@@ -1,12 +1,12 @@
 import { Scene } from 'phaser';
 
-const WALK_SPEED = 75;
+const WALK_SPEED = 1;
 
 export class Game extends Scene {
   camera: Phaser.Cameras.Scene2D.Camera;
   background: Phaser.GameObjects.Image;
   msg_text: Phaser.GameObjects.Text;
-  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  player: Phaser.Physics.Matter.Sprite;
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
 
   constructor() {
@@ -28,22 +28,28 @@ export class Game extends Scene {
     objects?.setCollisionFromCollisionGroup();
     objects.setVisible(false);
 
+    this.matter.world.convertTilemapLayer(
+      ground as Phaser.Tilemaps.TilemapLayer,
+    );
+    this.matter.world.convertTilemapLayer(
+      objects as Phaser.Tilemaps.TilemapLayer,
+    );
+    this.matter.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+
     // Handle keyboard input.
     this.cursors = this.input.keyboard!.createCursorKeys();
 
     // Load the character sprite.
-    this.player = this.physics.add.sprite(100, 100, 'king', 0);
-    this.player.setCollideWorldBounds(true);
-    this.player.setBodySize(20, 8);
-    this.player.setOffset(6, 24);
+    this.player = this.matter.add.sprite(100, 100, 'king', 0, {
+      restitution: 0.5,
+      shape: { type: 'rectangle', width: 20, height: 8 },
+      render: { sprite: { xOffset: 0, yOffset: 0.4 } },
+    });
+    this.player.setFixedRotation();
 
     this.input.once('pointerdown', () => {
       this.scene.start('GameOver');
     });
-
-    // Setup collision between player and tilemap layers
-    this.physics.add.collider(this.player, ground!);
-    this.physics.add.collider(this.player, objects!);
 
     // Get all tile indices which are marked as objects.
     const objectTiles = new Map<number, number[]>();
@@ -83,9 +89,7 @@ export class Game extends Scene {
   }
 
   update() {
-    this.player.setDepth(
-      this.player.getWorldPoint().y + this.player.height / 2,
-    );
+    this.player.setDepth(this.player.getWorldPoint().y);
     this.player.setVelocity(0);
 
     const hor = this.cursors.left.isDown || this.cursors.right.isDown;
