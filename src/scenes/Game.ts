@@ -92,25 +92,16 @@ export class Game extends Scene {
     this.player.setDepth(this.player.getWorldPoint().y);
     this.player.setVelocity(0);
 
-    const hor = this.cursors.left.isDown || this.cursors.right.isDown;
-    const ver = this.cursors.up.isDown || this.cursors.down.isDown;
-
-    // Adjust scale if moving diagonally so that magnitude is maintained.
-    let scale = 1.0;
-    if (hor && ver) {
-      scale = 1.0 / Math.sqrt(2);
-    }
-
     if (this.cursors.left.isDown) {
-      this.player.setVelocityX(-WALK_SPEED * scale);
+      this.player.setVelocityX(-WALK_SPEED);
     } else if (this.cursors.right.isDown) {
-      this.player.setVelocityX(WALK_SPEED * scale);
+      this.player.setVelocityX(WALK_SPEED);
     }
 
     if (this.cursors.up.isDown) {
-      this.player.setVelocityY(-WALK_SPEED * scale);
+      this.player.setVelocityY(-WALK_SPEED);
     } else if (this.cursors.down.isDown) {
-      this.player.setVelocityY(WALK_SPEED * scale);
+      this.player.setVelocityY(WALK_SPEED);
     }
   }
 }
