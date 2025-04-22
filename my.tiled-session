@@ -42,7 +42,7 @@
         "public/assets/maps/forest.tmj"
     ],
     "project": "my.tiled-project",
-    "property.type": "bool",
+    "property.type": "int",
     "recentFiles": [
         "public/assets/maps/forest.tmj"
     ],
