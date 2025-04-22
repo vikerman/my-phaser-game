@@ -1,5 +1,7 @@
 import { Scene } from 'phaser';
 
+const WALK_SPEED = 75;
+
 export class Game extends Scene {
   camera: Phaser.Cameras.Scene2D.Camera;
   background: Phaser.GameObjects.Image;
@@ -46,16 +48,25 @@ export class Game extends Scene {
   update() {
     this.player.setVelocity(0);
 
+    const hor = this.cursors.left.isDown || this.cursors.right.isDown;
+    const ver = this.cursors.up.isDown || this.cursors.down.isDown;
+
+    // Adjust scale if moving horizontally so that magnitude is maintained.
+    let scale = 1.0;
+    if (hor && ver) {
+      scale = 1.0 / Math.sqrt(2);
+    }
+
     if (this.cursors.left.isDown) {
-      this.player.setVelocityX(-75);
+      this.player.setVelocityX(-WALK_SPEED * scale);
     } else if (this.cursors.right.isDown) {
-      this.player.setVelocityX(75);
+      this.player.setVelocityX(WALK_SPEED * scale);
     }
 
     if (this.cursors.up.isDown) {
-      this.player.setVelocityY(-75);
+      this.player.setVelocityY(-WALK_SPEED * scale);
     } else if (this.cursors.down.isDown) {
-      this.player.setVelocityY(75);
+      this.player.setVelocityY(WALK_SPEED * scale);
     }
   }
 }
