@@ -27,6 +27,14 @@ export class Preloader extends Scene {
     this.load.setPath('assets');
 
     this.load.image('logo', 'logo.png');
+
+    this.load.tilemapTiledJSON('map', 'maps/forest.tmj');
+    this.load.image('forest', 'tilesets/forest/gentle forest v01.png');
+
+    this.load.spritesheet('king', 'characters/npc/npc king A v03.png', {
+      frameWidth: 32,
+      frameHeight: 32,
+    });
   }
 
   create() {

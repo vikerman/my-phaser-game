@@ -15,8 +15,16 @@ const config: Types.Core.GameConfig = {
   parent: 'game-container',
   backgroundColor: '#028af8',
   scale: {
-    mode: Phaser.Scale.ENVELOP,
+    mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+  pixelArt: true,
+  physics: {
+    default: 'arcade',
+    arcade: {
+      debug: true,
+      gravity: { x: 0, y: 0 },
+    },
   },
   scene: [Boot, Preloader, MainMenu, MainGame, GameOver],
 };
