@@ -35,6 +35,8 @@ export class Game extends Scene {
     );
     this.matter.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
+    // Debug toggle.
+    this.matter.world.drawDebug = false;
     const keyObject = this.input.keyboard?.addKey('Space');
     keyObject?.on('down', () => {
       this.matter.world.drawDebug = !this.matter.world.drawDebug;
