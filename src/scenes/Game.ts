@@ -25,7 +25,7 @@ export class Game extends Scene {
     // Add colliders from the tilemap layers
     ground?.setCollisionFromCollisionGroup();
     objects?.setCollisionFromCollisionGroup();
-    objects.setVisible(false);
+    objects?.setVisible(false);
 
     this.matter.world.convertTilemapLayer(
       ground as Phaser.Tilemaps.TilemapLayer,
@@ -54,6 +54,7 @@ export class Game extends Scene {
     });
     this.player.setFixedRotation();
 
+    // Scene change
     this.input.once('pointerdown', () => {
       this.scene.start('GameOver');
     });
