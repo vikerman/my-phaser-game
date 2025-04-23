@@ -15,7 +15,6 @@ export class Game extends Scene {
 
   create() {
     this.camera = this.cameras.main;
-    this.camera.setBounds(0, 0, 4096, 4096);
 
     const map = this.make.tilemap({ key: 'map' });
     const tileset = map.addTilesetImage('forest');
@@ -56,6 +55,10 @@ export class Game extends Scene {
     this.input.once('pointerdown', () => {
       this.scene.start('GameOver');
     });
+
+    // Setup camera.
+    this.camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
+    this.cameras.main.startFollow(this.player);
 
     // Get all tile indices which are marked as objects.
     const objectTiles = new Map<number, number[]>();
