@@ -36,12 +36,18 @@ export class Game extends Scene {
     );
     this.matter.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
 
+    const keyObject = this.input.keyboard?.addKey('Space');
+    keyObject?.on('down', () => {
+      this.matter.world.drawDebug = !this.matter.world.drawDebug;
+      this.matter.world.debugGraphic.clear();
+    });
+
     // Handle keyboard input.
     this.cursors = this.input.keyboard!.createCursorKeys();
 
     // Load the character sprite.
     this.player = this.matter.add.sprite(100, 100, 'king', 0, {
-      restitution: 0.5,
+      restitution: 0,
       shape: { type: 'rectangle', width: 20, height: 8 },
       render: { sprite: { xOffset: 0, yOffset: 0.4 } },
     });
