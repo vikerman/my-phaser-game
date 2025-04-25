@@ -1,4 +1,5 @@
 import { Scene } from 'phaser';
+import { AnimatedTiles } from '../plugins/AnimatedTiles';
 
 const WALK_SPEED = 1;
 
@@ -13,6 +14,16 @@ export class Game extends Scene {
     super('Game');
   }
 
+  preload() {
+    // Plugins
+    this.load.scenePlugin(
+      'animatedTiles',
+      AnimatedTiles,
+      'animatedTiles',
+      'animatedTiles',
+    );
+  }
+
   create() {
     this.camera = this.cameras.main;
 
@@ -21,6 +32,9 @@ export class Game extends Scene {
 
     const ground = map.createLayer('ground', tileset!, 0, 0); // layer index, tileset, x, y
     const objects = map.createLayer('objects', tileset!, 0, 0); // layer index, tileset, x, y
+
+    // Setup AnimatedTiles
+    (this as any).animatedTiles.init(map);
 
     // Add colliders from the tilemap layers
     ground?.setCollisionFromCollisionGroup();
