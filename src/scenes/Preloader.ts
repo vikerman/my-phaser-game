@@ -34,6 +34,10 @@ export class Preloader extends Scene {
       frameWidth: 16,
       frameHeight: 16,
     });
+    this.load.spritesheet('objects1', 'tilesets/forest/gentle 32x32 v01.png', {
+      frameWidth: 16,
+      frameHeight: 16,
+    });
 
     this.load.spritesheet('king', 'characters/npc/npc king A v03.png', {
       frameWidth: 32,
@@ -46,6 +50,6 @@ export class Preloader extends Scene {
     //  For example, you can define global animations here, so we can use them in other scenes.
 
     //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
-    this.scene.start('MainMenu');
+    this.scene.start('Game');
   }
 }

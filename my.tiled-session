@@ -38,6 +38,9 @@
         "public/assets/maps/forest.tmj#items": {
             "scaleInDock": 1,
             "scaleInEditor": 1
+        },
+        "public/assets/maps/forest.tmj#trees": {
+            "scaleInEditor": 1
         }
     },
     "last.imagePath": "/home/vikram/src/my-phaser-game/public/assets/tilesets/forest",

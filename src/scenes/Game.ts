@@ -3,6 +3,120 @@ import { AnimatedTiles } from '../plugins/AnimatedTiles';
 
 const WALK_SPEED = 1;
 
+var DeepCopy = function (inObject: any) {
+  var outObject: any;
+  var value;
+  var key;
+
+  if (typeof inObject !== 'object' || inObject === null) {
+    //  inObject is not an object
+    return inObject;
+  }
+
+  //  Create an array or object to hold the values
+  outObject = Array.isArray(inObject) ? [] : {};
+
+  for (key in inObject) {
+    value = inObject[key];
+
+    //  Recursively (deep) copy for nested objects, including arrays
+    outObject[key] = DeepCopy(value);
+  }
+
+  return outObject;
+};
+
+var GetFastValue = function (source: any, key: any, defaultValue: any) {
+  var t = typeof source;
+
+  if (!source || t === 'number' || t === 'string') {
+    return defaultValue;
+  } else if (source.hasOwnProperty(key) && source[key] !== undefined) {
+    return source[key];
+  } else {
+    return defaultValue;
+  }
+};
+
+var GetTilesWithin = function (
+  tileX: number,
+  tileY: number,
+  width: number,
+  height: number,
+  filteringOptions: any,
+  layer: Phaser.Tilemaps.LayerData,
+) {
+  if (tileX === undefined) {
+    tileX = 0;
+  }
+  if (tileY === undefined) {
+    tileY = 0;
+  }
+  if (width === undefined) {
+    width = layer.width;
+  }
+  if (height === undefined) {
+    height = layer.height;
+  }
+  if (!filteringOptions) {
+    filteringOptions = {};
+  }
+
+  var isNotEmpty = GetFastValue(filteringOptions, 'isNotEmpty', false);
+  var isColliding = GetFastValue(filteringOptions, 'isColliding', false);
+  var hasInterestingFace = GetFastValue(
+    filteringOptions,
+    'hasInterestingFace',
+    false,
+  );
+
+  // Clip x, y to top left of map, while shrinking width/height to match.
+  if (tileX < 0) {
+    width += tileX;
+    tileX = 0;
+  }
+
+  if (tileY < 0) {
+    height += tileY;
+    tileY = 0;
+  }
+
+  // Clip width and height to bottom right of map.
+  if (tileX + width > layer.width) {
+    width = Math.max(layer.width - tileX, 0);
+  }
+
+  if (tileY + height > layer.height) {
+    height = Math.max(layer.height - tileY, 0);
+  }
+
+  var results = [];
+
+  for (var ty = tileY; ty < tileY + height; ty++) {
+    for (var tx = tileX; tx < tileX + width; tx++) {
+      var tile = layer.data[ty][tx];
+
+      if (tile !== null) {
+        if (isNotEmpty && tile.index === -1) {
+          continue;
+        }
+
+        if (isColliding && !tile.collides) {
+          continue;
+        }
+
+        if (hasInterestingFace && !tile.hasInterestingFace) {
+          continue;
+        }
+
+        results.push(tile);
+      }
+    }
+  }
+
+  return results;
+};
+
 export class Game extends Scene {
   camera: Phaser.Cameras.Scene2D.Camera;
   background: Phaser.GameObjects.Image;
@@ -29,9 +143,14 @@ export class Game extends Scene {
 
     const map = this.make.tilemap({ key: 'map' });
     const tileset = map.addTilesetImage('forest');
+    const objects1 = map.addTilesetImage('objects1');
 
-    const ground = map.createLayer('ground', tileset!, 0, 0); // layer index, tileset, x, y
-    const objects = map.createLayer('objects', tileset!, 0, 0); // layer index, tileset, x, y
+    const ground = map.createLayer('ground', [tileset!, objects1!], 0, 0); // layer index, tileset, x, y
+    const objects = map.createLayer('objects', [tileset!, objects1!], 0, 0); // layer index, tileset, x, y
+
+    // Test tint
+    // ground?.setTint(0x212245);
+    // objects?.setTint(0x212245);
 
     // Setup AnimatedTiles
     (this as any).animatedTiles.init(map);
@@ -67,11 +186,12 @@ export class Game extends Scene {
       render: { sprite: { xOffset: 0, yOffset: 0.4 } },
     });
     this.player.setFixedRotation();
+    // this.player.setTint(0x212245);
 
     // Scene change
-    this.input.once('pointerdown', () => {
-      this.scene.start('GameOver');
-    });
+    // this.input.once('pointerdown', () => {
+    //   this.scene.start('GameOver');
+    // });
 
     // Setup camera.
     this.camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
@@ -79,25 +199,25 @@ export class Game extends Scene {
 
     // Get all tile indices which are marked as objects.
     const objectTiles = new Map<number, number[]>();
-    for (
-      let i = tileset?.firstgid!;
-      i <= tileset?.firstgid! + tileset?.total!;
-      i++
-    ) {
-      const props = tileset?.getTileProperties(i) as {
-        object: boolean;
-        origin: number;
-      };
-      if (props && props['object']) {
-        const origin = props['origin'] || 0;
-        const val = objectTiles.get(origin) || [];
-        val.push(i);
-        objectTiles.set(origin, val);
+
+    for (const ts of [tileset, objects1]) {
+      for (let i = ts?.firstgid!; i <= ts?.firstgid! + ts?.total!; i++) {
+        const props = ts?.getTileProperties(i) as {
+          object: boolean;
+          origin: number;
+        };
+        if (props && props['object']) {
+          const origin = props['origin'] || 0;
+          const val = objectTiles.get(origin) || [];
+          val.push(i);
+          objectTiles.set(origin, val);
+        }
       }
     }
 
     // Replace the object tiles with sprites...
     for (const origin of objectTiles.keys()) {
+      // Current Phaser version with the bug.
       const sprites = map.createFromTiles(
         objectTiles.get(origin)!,
         undefined,
@@ -108,10 +228,119 @@ export class Game extends Scene {
         this.camera,
         'objects',
       );
+
+      // Local fixed version.
+      // const sprites = this.createFromTiles(
+      //   map,
+      //   objectTiles.get(origin)!,
+      //   {
+      //     useSpriteSheet: true,
+      //   },
+      //   this,
+      //   this.camera,
+      //   'objects',
+      // );
+
       for (const s of sprites!) {
-        s.setDepth(s.getWorldPoint().y + s.height / 2 + s.height * origin);
+        let depth = 0;
+        // If origin is <0 don't set Y based depth but give a fixed depth of 1.
+        if (origin >= 0) {
+          depth = s.getWorldPoint().y + s.height / 2 + s.height * origin;
+        } else {
+          depth = 1;
+        }
+        s.setDepth(depth);
+        // s.setTint(0x212245);
       }
     }
+  }
+
+  private createFromTiles(
+    map: Phaser.Tilemaps.Tilemap,
+    indexes: number[],
+    spriteConfig: Phaser.Types.GameObjects.Sprite.SpriteConfig,
+    scene: Phaser.Scene,
+    camera: Phaser.Cameras.Scene2D.Camera,
+    layer: string,
+  ): Phaser.GameObjects.Sprite[] {
+    if (!spriteConfig) {
+      spriteConfig = {};
+    }
+
+    if (!Array.isArray(indexes)) {
+      indexes = [indexes];
+    }
+
+    const layerObj = map.getLayer(layer);
+    if (layerObj == null) {
+      return [];
+    }
+    let tilemapLayer = layerObj.tilemapLayer;
+
+    if (!scene) {
+      scene = tilemapLayer.scene;
+    }
+    if (!camera) {
+      camera = scene.cameras.main;
+    }
+
+    var layerWidth = layerObj.width;
+    var layerHeight = layerObj.height;
+
+    var tiles = GetTilesWithin(0, 0, layerWidth, layerHeight, null, layerObj);
+    var sprites = [];
+    var i;
+
+    var mergeExtras = function (config: any, tile: any, properties: any[]) {
+      for (var i = 0; i < properties.length; i++) {
+        var property = properties[i];
+
+        if (!config.hasOwnProperty(property)) {
+          config[property] = tile[property];
+        }
+      }
+    };
+
+    for (i = 0; i < tiles.length; i++) {
+      var tile = tiles[i];
+      var config = DeepCopy(spriteConfig);
+
+      if (indexes.indexOf(tile.index) !== -1) {
+        var point = tilemapLayer.tileToWorldXY(
+          tile.x,
+          tile.y,
+          undefined,
+          camera,
+        );
+
+        config.x = point.x;
+        config.y = point.y;
+
+        mergeExtras(config, tile, [
+          'rotation',
+          'flipX',
+          'flipY',
+          'alpha',
+          'visible',
+          'tint',
+        ]);
+
+        if (!config.hasOwnProperty('origin')) {
+          config.x += tile.width * 0.5;
+          config.y += tile.height * 0.5;
+        }
+
+        if (config.hasOwnProperty('useSpriteSheet')) {
+          const ts = tile.tileset!;
+          config.key = ts.image;
+          config.frame = tile.index - ts.firstgid;
+        }
+
+        sprites.push(scene.make.sprite(config));
+      }
+    }
+
+    return sprites;
   }
 
   update() {

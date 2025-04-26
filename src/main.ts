@@ -26,7 +26,7 @@ const config: Types.Core.GameConfig = {
       gravity: { x: 0, y: 0 },
     },
   },
-  scene: [Boot, Preloader, MainMenu, MainGame, GameOver],
+  scene: [Boot, Preloader, /* MainMenu, */ MainGame, GameOver],
 };
 
 export default new Game(config);
