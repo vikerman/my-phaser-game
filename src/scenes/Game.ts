@@ -122,6 +122,7 @@ export class Game extends Scene {
   msg_text: Phaser.GameObjects.Text;
   player: Phaser.Physics.Matter.Sprite;
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+  playerLight: Phaser.GameObjects.Light;
 
   constructor() {
     super('Game');
@@ -136,6 +137,8 @@ export class Game extends Scene {
 
     const ground = map.createLayer('ground', [tileset!, objects1!], 0, 0); // layer index, tileset, x, y
     const objects = map.createLayer('objects', [tileset!, objects1!], 0, 0); // layer index, tileset, x, y
+
+    ground.setLighting(true);
 
     // Test tint
     // ground?.setTint(0x212245);
@@ -175,6 +178,7 @@ export class Game extends Scene {
       render: { sprite: { xOffset: 0, yOffset: 0.4 } },
     });
     this.player.setFixedRotation();
+    this.player.setLighting(true);
     // this.player.setTint(0x212245);
 
     // Scene change
@@ -185,6 +189,23 @@ export class Game extends Scene {
     // Setup camera.
     this.camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.cameras.main.startFollow(this.player, true /* roundPixels */);
+
+    // Lighting
+    // Sunset
+    // 0xfff474
+    // 0xfd5e53
+    // 0x3c3b5f
+    // 0x191c5c
+
+    this.lights.enable().setAmbientColor(0x191c5c);
+
+    this.playerLight = this.lights.addLight(
+      this.player.x - 20,
+      this.player.y - 8,
+      50,
+      0xbb6611,
+      3,
+    );
 
     // Get all tile indices which are marked as objects.
     const objectTiles = new Map<number, number[]>();
@@ -239,7 +260,7 @@ export class Game extends Scene {
           depth = 1;
         }
         s.setDepth(depth);
-        // s.setTint(0x212245);
+        s.setLighting(true);
       }
     }
   }
@@ -347,5 +368,8 @@ export class Game extends Scene {
     } else if (this.cursors.down.isDown) {
       this.player.setVelocityY(WALK_SPEED);
     }
+
+    this.playerLight.x = this.player.x - 20;
+    this.playerLight.y = this.player.y - 8;
   }
 }
