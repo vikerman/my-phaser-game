@@ -184,7 +184,7 @@ export class Game extends Scene {
 
     // Setup camera.
     this.camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-    this.cameras.main.startFollow(this.player);
+    this.cameras.main.startFollow(this.player, true /* roundPixels */);
 
     // Get all tile indices which are marked as objects.
     const objectTiles = new Map<number, number[]>();
