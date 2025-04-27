@@ -134,18 +134,15 @@ export class Game extends Scene {
     const map = this.make.tilemap({ key: 'map' });
     const tileset = map.addTilesetImage('forest');
     const objects1 = map.addTilesetImage('objects1');
+    const trees = map.addTilesetImage('trees');
 
-    const ground = map.createLayer('ground', [tileset!, objects1!], 0, 0); // layer index, tileset, x, y
-    const objects = map.createLayer('objects', [tileset!, objects1!], 0, 0); // layer index, tileset, x, y
+    const tilesets = [tileset!, objects1!, trees!];
+
+    const ground = map.createLayer('ground', tilesets, 0, 0); // layer index, tileset, x, y
+    // map.createLayer('shadow', tilesets, 0, 0); // layer index, tileset, x, y
+    const objects = map.createLayer('objects', tilesets, 0, 0); // layer index, tileset, x, y
 
     ground.setLighting(true);
-
-    // Test tint
-    // ground?.setTint(0x212245);
-    // objects?.setTint(0x212245);
-
-    // Setup AnimatedTiles
-    // (this as any).animatedTiles.init(map);
 
     // Add colliders from the tilemap layers
     ground?.setCollisionFromCollisionGroup();
@@ -223,7 +220,7 @@ export class Game extends Scene {
     // Get all tile indices which are marked as objects.
     const objectTiles = new Map<number, number[]>();
 
-    for (const ts of [tileset, objects1]) {
+    for (const ts of tilesets) {
       for (let i = ts?.firstgid!; i <= ts?.firstgid! + ts?.total!; i++) {
         const props = ts?.getTileProperties(i) as {
           object: boolean;

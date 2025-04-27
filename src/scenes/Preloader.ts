@@ -38,6 +38,14 @@ export class Preloader extends Scene {
       frameWidth: 16,
       frameHeight: 16,
     });
+    this.load.spritesheet(
+      'trees',
+      'tilesets/forest/gentle trees 80x96 v01.png',
+      {
+        frameWidth: 16,
+        frameHeight: 16,
+      },
+    );
 
     this.load.spritesheet('king', 'characters/npc/npc king A v03.png', {
       frameWidth: 32,
