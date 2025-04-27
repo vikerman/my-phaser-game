@@ -51,6 +51,10 @@ export class Preloader extends Scene {
       frameWidth: 32,
       frameHeight: 32,
     });
+
+    this.load.audio('fire-idle', 'sounds/fire/Fireball_LOOP.wav');
+    this.load.audio('waterfall', 'sounds/water/1_river_outside.wav');
+    this.load.audio('night', 'sounds/night/1_night_outside.wav');
   }
 
   create() {

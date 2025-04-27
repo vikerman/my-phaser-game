@@ -217,6 +217,59 @@ export class Game extends Scene {
       },
     });
 
+    // Sounds
+
+    // Fire idle sound
+    const fireSound = this.sound.add('fire-idle', {
+      loop: true,
+      volume: 0.1,
+      source: {
+        x: 1000,
+        y: 100,
+        orientationX: 0,
+        orientationY: 0,
+        orientationZ: -1,
+        refDistance: 20,
+        follow: this.playerLight,
+      },
+    });
+    fireSound.play();
+
+    // Ambient night sound
+    const nightSound = this.sound.add('night', {
+      loop: true,
+      volume: 0.1,
+      source: {
+        x: 1000,
+        y: 100,
+        orientationX: 0,
+        orientationY: 0,
+        orientationZ: -1,
+        refDistance: 20,
+        follow: this.playerLight,
+      },
+    });
+    nightSound.play();
+
+    // Waterfall sound
+    const waterfall = this.sound.add('waterfall', {
+      loop: true,
+      source: {
+        x: 1000,
+        y: 400,
+        orientationX: 0,
+        orientationY: 0,
+        orientationZ: -1,
+        distanceModel: 'exponential',
+        refDistance: 40,
+        rolloffFactor: 1.75,
+        coneInnerAngle: 180,
+        coneOuterAngle: 280,
+        coneOuterGain: 0.2,
+      },
+    });
+    waterfall.play();
+
     // Get all tile indices which are marked as objects.
     const objectTiles = new Map<number, number[]>();
 
@@ -381,5 +434,7 @@ export class Game extends Scene {
 
     this.playerLight.x = this.player.x - 20;
     this.playerLight.y = this.player.y - 8;
+
+    this.sound.listenerPosition.set(this.player.x, this.player.y);
   }
 }
