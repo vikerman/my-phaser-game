@@ -202,10 +202,23 @@ export class Game extends Scene {
     this.playerLight = this.lights.addLight(
       this.player.x - 20,
       this.player.y - 8,
-      50,
+      100,
       0xbb6611,
-      3,
+      1.5,
+      25,
     );
+
+    const tween = this.tweens.add({
+      targets: this.playerLight,
+      ease: 'Bounce',
+      intensity: 0.5,
+      yoyo: true,
+      repeat: -1,
+      duration: 1000,
+      onRepeat: () => {
+        tween.duration = 100 + Math.random() * 900;
+      },
+    });
 
     // Get all tile indices which are marked as objects.
     const objectTiles = new Map<number, number[]>();
