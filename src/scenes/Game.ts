@@ -1,5 +1,4 @@
 import { Scene } from 'phaser';
-import { AnimatedTiles } from '../plugins/AnimatedTiles';
 
 const WALK_SPEED = 1;
 
@@ -128,16 +127,6 @@ export class Game extends Scene {
     super('Game');
   }
 
-  preload() {
-    // Plugins
-    this.load.scenePlugin(
-      'animatedTiles',
-      AnimatedTiles,
-      'animatedTiles',
-      'animatedTiles',
-    );
-  }
-
   create() {
     this.camera = this.cameras.main;
 
@@ -153,7 +142,7 @@ export class Game extends Scene {
     // objects?.setTint(0x212245);
 
     // Setup AnimatedTiles
-    (this as any).animatedTiles.init(map);
+    // (this as any).animatedTiles.init(map);
 
     // Add colliders from the tilemap layers
     ground?.setCollisionFromCollisionGroup();
@@ -180,7 +169,7 @@ export class Game extends Scene {
     this.cursors = this.input.keyboard!.createCursorKeys();
 
     // Load the character sprite.
-    this.player = this.matter.add.sprite(100, 100, 'king', 0, {
+    this.player = this.matter.add.sprite(1000, 100, 'king', 0, {
       restitution: 0,
       shape: { type: 'rectangle', width: 20, height: 8 },
       render: { sprite: { xOffset: 0, yOffset: 0.4 } },
@@ -218,21 +207,9 @@ export class Game extends Scene {
     // Replace the object tiles with sprites...
     for (const origin of objectTiles.keys()) {
       // Current Phaser version with the bug.
-      const sprites = map.createFromTiles(
-        objectTiles.get(origin)!,
-        undefined,
-        {
-          useSpriteSheet: true,
-        },
-        this,
-        this.camera,
-        'objects',
-      );
-
-      // Local fixed version.
-      // const sprites = this.createFromTiles(
-      //   map,
+      // const sprites = map.createFromTiles(
       //   objectTiles.get(origin)!,
+      //   undefined,
       //   {
       //     useSpriteSheet: true,
       //   },
@@ -240,6 +217,18 @@ export class Game extends Scene {
       //   this.camera,
       //   'objects',
       // );
+
+      // Local fixed version.
+      const sprites = this.createFromTiles(
+        map,
+        objectTiles.get(origin)!,
+        {
+          useSpriteSheet: true,
+        },
+        this,
+        this.camera,
+        'objects',
+      );
 
       for (const s of sprites!) {
         let depth = 0;
