@@ -255,19 +255,19 @@ export class Game extends Scene {
     // Waterfall sound
     const waterfall = this.sound.add('waterfall', {
       loop: true,
-      volume: 0.25,
+      volume: 0.5,
       source: {
         x: 950,
         y: 300,
         orientationX: 0,
         orientationY: 0,
-        orientationZ: -1,
+        orientationZ: 1,
         distanceModel: 'inverse',
-        refDistance: 40,
-        rolloffFactor: 1,
+        refDistance: 100,
+        rolloffFactor: 0.5,
         coneInnerAngle: 180,
         coneOuterAngle: 280,
-        coneOuterGain: 0.2,
+        coneOuterGain: 1.0,
       },
     });
     waterfall.play();
