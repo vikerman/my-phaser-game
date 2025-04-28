@@ -195,7 +195,7 @@ export class Game extends Scene {
     // 0x3c3b5f
     // 0x191c5c
 
-    this.lights.enable().setAmbientColor(0x191c5c);
+    this.lights.enable().setAmbientColor(0x101010);
 
     this.playerLight = this.lights.addLight(
       this.player.x - 20,
@@ -328,6 +328,12 @@ export class Game extends Scene {
         s.setLighting(true);
       }
     }
+
+    // Scene PostEffects.
+    this.camera.filters.internal
+      .addColorMatrix()
+      .colorMatrix.contrast(0.2)
+      .saturate(0.3, true);
   }
 
   private createFromTiles(
