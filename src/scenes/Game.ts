@@ -1,6 +1,7 @@
 import { Scene } from 'phaser';
 
 const WALK_SPEED = 1;
+const DIAGONAL_SCALE = 1.0 / Math.SQRT2;
 
 var DeepCopy = function (inObject: any) {
   var outObject: any;
@@ -254,15 +255,16 @@ export class Game extends Scene {
     // Waterfall sound
     const waterfall = this.sound.add('waterfall', {
       loop: true,
+      volume: 0.25,
       source: {
-        x: 1000,
-        y: 400,
+        x: 950,
+        y: 300,
         orientationX: 0,
         orientationY: 0,
         orientationZ: -1,
-        distanceModel: 'exponential',
+        distanceModel: 'inverse',
         refDistance: 40,
-        rolloffFactor: 1.75,
+        rolloffFactor: 1,
         coneInnerAngle: 180,
         coneOuterAngle: 280,
         coneOuterGain: 0.2,
@@ -420,16 +422,24 @@ export class Game extends Scene {
     this.player.setDepth(this.player.getWorldPoint().y);
     this.player.setVelocity(0);
 
+    const diagonal =
+      (this.cursors.left.isDown || this.cursors.right.isDown) &&
+      (this.cursors.up.isDown || this.cursors.down.isDown);
+    let scale = 1.0;
+    if (diagonal) {
+      scale = DIAGONAL_SCALE;
+    }
+
     if (this.cursors.left.isDown) {
-      this.player.setVelocityX(-WALK_SPEED);
+      this.player.setVelocityX(-WALK_SPEED * scale);
     } else if (this.cursors.right.isDown) {
-      this.player.setVelocityX(WALK_SPEED);
+      this.player.setVelocityX(WALK_SPEED * scale);
     }
 
     if (this.cursors.up.isDown) {
-      this.player.setVelocityY(-WALK_SPEED);
+      this.player.setVelocityY(-WALK_SPEED * scale);
     } else if (this.cursors.down.isDown) {
-      this.player.setVelocityY(WALK_SPEED);
+      this.player.setVelocityY(WALK_SPEED * scale);
     }
 
     this.playerLight.x = this.player.x - 20;
