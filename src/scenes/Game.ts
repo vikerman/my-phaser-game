@@ -186,7 +186,10 @@ export class Game extends Scene {
 
     // Setup camera.
     this.camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-    this.cameras.main.startFollow(this.player, true /* roundPixels */);
+    this.camera.startFollow(this.player, true /* roundPixels */);
+
+    // Whole scene Effects
+    // this.camera.filters.internal.addColorMatrix().colorMatrix.vintagePinhole();
 
     // Lighting
     // Sunset
@@ -195,15 +198,15 @@ export class Game extends Scene {
     // 0x3c3b5f
     // 0x191c5c
 
-    this.lights.enable().setAmbientColor(0x101010);
+    this.lights.enable().setAmbientColor(0x04084f);
 
     this.playerLight = this.lights.addLight(
       this.player.x - 20,
       this.player.y - 8,
-      100,
+      128,
       0xbb6611,
       1.5,
-      25,
+      13,
     );
 
     const tween = this.tweens.add({
