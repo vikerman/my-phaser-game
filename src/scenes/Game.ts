@@ -124,6 +124,11 @@ export class Game extends Scene {
   player: Phaser.Physics.Matter.Sprite;
   cursors: Phaser.Types.Input.Keyboard.CursorKeys;
   playerLight: Phaser.GameObjects.Light;
+  waterfall:
+    | Phaser.Sound.NoAudioSound
+    | Phaser.Sound.HTML5AudioSound
+    | Phaser.Sound.WebAudioSound;
+  waterfallPos: Phaser.Math.Vector2;
 
   constructor() {
     super('Game');
@@ -197,6 +202,8 @@ export class Game extends Scene {
     // 0xfd5e53
     // 0x3c3b5f
     // 0x191c5c
+    // Moonlight
+    // 0x04084f
 
     this.lights.enable().setAmbientColor(0x04084f);
 
@@ -204,9 +211,10 @@ export class Game extends Scene {
       this.player.x - 20,
       this.player.y - 8,
       128,
+      // 0x11cccc,
       0xbb6611,
       1.5,
-      13,
+      20,
     );
 
     const tween = this.tweens.add({
@@ -243,37 +251,59 @@ export class Game extends Scene {
     const nightSound = this.sound.add('night', {
       loop: true,
       volume: 0.1,
-      source: {
-        x: 1000,
-        y: 100,
-        orientationX: 0,
-        orientationY: 0,
-        orientationZ: -1,
-        refDistance: 20,
-        follow: this.playerLight,
-      },
+      // source: {
+      //   x: 1000,
+      //   y: 100,
+      //   orientationX: 0,
+      //   orientationY: -1,
+      //   orientationZ: 0,
+      //   refDistance: 20,
+      //   follow: this.playerLight,
+      // },
     });
     nightSound.play();
 
     // Waterfall sound
-    const waterfall = this.sound.add('waterfall', {
+    this.waterfall = this.sound.add('waterfall', {
       loop: true,
-      volume: 0.5,
-      source: {
-        x: 950,
-        y: 300,
-        orientationX: 0,
-        orientationY: 0,
-        orientationZ: 1,
-        distanceModel: 'inverse',
-        refDistance: 100,
-        rolloffFactor: 0.5,
-        coneInnerAngle: 180,
-        coneOuterAngle: 280,
-        coneOuterGain: 1.0,
-      },
+      volume: 0.25,
+      // source: {
+      //   x: 800,
+      //   y: 300,
+      //   orientationX: 0,
+      //   orientationY: -1,
+      //   orientationZ: 0,
+      //   panningModel: 'HRTF',
+      //   distanceModel: 'inverse',
+      //   refDistance: 150,
+      //   rolloffFactor: 1,
+      //   coneInnerAngle: 180,
+      //   coneOuterAngle: 280,
+      //   coneOuterGain: 0.5,
+      // },
     });
-    waterfall.play();
+    this.waterfall.play();
+    this.waterfallPos = new Phaser.Math.Vector2(900, 300);
+
+    // const waterfall2 = this.sound.add('waterfall', {
+    //   loop: true,
+    //   volume: 0.25,
+    //   source: {
+    //     x: 1000,
+    //     y: 300,
+    //     orientationX: 0,
+    //     orientationY: 0,
+    //     orientationZ: 1,
+    //     panningModel: 'HRTF',
+    //     distanceModel: 'inverse',
+    //     refDistance: 150,
+    //     rolloffFactor: 1,
+    //     coneInnerAngle: 180,
+    //     coneOuterAngle: 280,
+    //     coneOuterGain: 0.5,
+    //   },
+    // });
+    // waterfall2.play();
 
     // Get all tile indices which are marked as objects.
     const objectTiles = new Map<number, number[]>();
@@ -454,6 +484,10 @@ export class Game extends Scene {
     this.playerLight.x = this.player.x - 20;
     this.playerLight.y = this.player.y - 8;
 
-    this.sound.listenerPosition.set(this.player.x, this.player.y);
+    const dist = this.waterfallPos.distance(this.player);
+    if (dist != 0) {
+      let vol = Math.max(0, Math.min(1, 50 / dist));
+      this.waterfall.setVolume(vol);
+    }
   }
 }

@@ -4,6 +4,7 @@ import { GameOver } from './scenes/GameOver';
 import { MainMenu } from './scenes/MainMenu';
 import { Preloader } from './scenes/Preloader';
 import { Glow } from './scenes/Glow';
+import { Glow2 } from './scenes/Glow2';
 
 import { Game, Types } from 'phaser';
 
@@ -27,7 +28,7 @@ const config: Types.Core.GameConfig = {
       gravity: { x: 0, y: 0 },
     },
   },
-  scene: [Boot, Preloader, Glow, /* MainMenu, */ MainGame, GameOver],
+  scene: [Boot, Preloader, Glow, Glow2, /* MainMenu, */ MainGame, GameOver],
 };
 
 export default new Game(config);
