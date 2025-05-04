@@ -1,7 +1,5 @@
 import { Scene } from 'phaser';
-
-const WALK_SPEED = 1;
-const DIAGONAL_SCALE = 1.0 / Math.SQRT2;
+import { Character } from '../objects/character';
 
 var DeepCopy = function (inObject: any) {
   var outObject: any;
@@ -121,14 +119,14 @@ export class Game extends Scene {
   camera: Phaser.Cameras.Scene2D.Camera;
   background: Phaser.GameObjects.Image;
   msg_text: Phaser.GameObjects.Text;
-  player: Phaser.Physics.Matter.Sprite;
-  cursors: Phaser.Types.Input.Keyboard.CursorKeys;
+  player: Character;
   playerLight: Phaser.GameObjects.Light;
   waterfall:
     | Phaser.Sound.NoAudioSound
     | Phaser.Sound.HTML5AudioSound
     | Phaser.Sound.WebAudioSound;
   waterfallPos: Phaser.Math.Vector2;
+  sprites: Phaser.GameObjects.Sprite[];
 
   constructor() {
     super('Game');
@@ -171,27 +169,16 @@ export class Game extends Scene {
       this.matter.world.debugGraphic.clear();
     });
 
-    // Handle keyboard input.
-    this.cursors = this.input.keyboard!.createCursorKeys();
-
     // Load the character sprite.
-    this.player = this.matter.add.sprite(1000, 100, 'king', 0, {
-      restitution: 0,
-      shape: { type: 'rectangle', width: 20, height: 8 },
-      render: { sprite: { xOffset: 0, yOffset: 0.4 } },
+    this.player = new Character(this, 'king', {
+      mainPlayer: true,
+      x: 1000,
+      y: 100,
     });
-    this.player.setFixedRotation();
-    this.player.setLighting(true);
-    // this.player.setTint(0x212245);
-
-    // Scene change
-    // this.input.once('pointerdown', () => {
-    //   this.scene.start('GameOver');
-    // });
 
     // Setup camera.
     this.camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
-    this.camera.startFollow(this.player, true /* roundPixels */);
+    this.camera.startFollow(this.player.mainObject(), true /* roundPixels */);
 
     // Whole scene Effects
     // this.camera.filters.internal.addColorMatrix().colorMatrix.vintagePinhole();
@@ -207,9 +194,10 @@ export class Game extends Scene {
 
     this.lights.enable().setAmbientColor(0x04084f);
 
+    const playerPos = this.player.getPosition();
     this.playerLight = this.lights.addLight(
-      this.player.x - 20,
-      this.player.y - 8,
+      playerPos.x - 20,
+      playerPos.y - 8,
       128,
       // 0x11cccc,
       0xbb6611,
@@ -349,11 +337,24 @@ export class Game extends Scene {
         'objects',
       );
 
-      for (const s of sprites!) {
+      for (const s of sprites) {
         let depth = 0;
         // If origin is <0 don't set Y based depth but give a fixed depth of 1.
         if (origin >= 0) {
           depth = s.getWorldPoint().y + s.height / 2 + s.height * origin;
+          // Create a sensor for the tile.
+          const pos = s.getWorldPoint();
+          const rect = this.matter.add.rectangle(
+            pos.x,
+            pos.y,
+            s.displayWidth,
+            s.displayHeight,
+            {
+              isSensor: true,
+            },
+          );
+          rect.label = 'object_sensor';
+          rect.gameObject = s;
         } else {
           depth = 1;
         }
@@ -458,33 +459,11 @@ export class Game extends Scene {
   }
 
   update() {
-    this.player.setDepth(this.player.getWorldPoint().y);
-    this.player.setVelocity(0);
+    const playerPos = this.player.getPosition();
+    this.playerLight.x = playerPos.x - 20;
+    this.playerLight.y = playerPos.y - 8;
 
-    const diagonal =
-      (this.cursors.left.isDown || this.cursors.right.isDown) &&
-      (this.cursors.up.isDown || this.cursors.down.isDown);
-    let scale = 1.0;
-    if (diagonal) {
-      scale = DIAGONAL_SCALE;
-    }
-
-    if (this.cursors.left.isDown) {
-      this.player.setVelocityX(-WALK_SPEED * scale);
-    } else if (this.cursors.right.isDown) {
-      this.player.setVelocityX(WALK_SPEED * scale);
-    }
-
-    if (this.cursors.up.isDown) {
-      this.player.setVelocityY(-WALK_SPEED * scale);
-    } else if (this.cursors.down.isDown) {
-      this.player.setVelocityY(WALK_SPEED * scale);
-    }
-
-    this.playerLight.x = this.player.x - 20;
-    this.playerLight.y = this.player.y - 8;
-
-    const dist = this.waterfallPos.distance(this.player);
+    const dist = this.waterfallPos.distance(this.player.getPosition());
     if (dist != 0) {
       let vol = Math.max(0, Math.min(1, 50 / dist));
       this.waterfall.setVolume(vol);
