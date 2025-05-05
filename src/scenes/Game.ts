@@ -192,7 +192,7 @@ export class Game extends Scene {
     // Moonlight
     // 0x04084f
 
-    this.lights.enable().setAmbientColor(0x04084f);
+    this.lights.enable().setAmbientColor(0xcccccc);
 
     const playerPos = this.player.getPosition();
     this.playerLight = this.lights.addLight(

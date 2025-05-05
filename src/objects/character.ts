@@ -97,28 +97,16 @@ export class Character {
     const other = bodyA.label == 'character_hitbox' ? bodyB : bodyA;
 
     if (other.label == 'object_sensor' && other.gameObject != null) {
-      if (
-        other.gameObject instanceof Phaser.GameObjects.Sprite &&
-        other.gameObject.depth > this.sprite.depth
-      ) {
+      if (other.gameObject instanceof Phaser.GameObjects.Sprite) {
         const scene = this.sprite.scene;
         const pos = this.sprite.getWorldPoint();
         const shadowSprite = scene.add.sprite(pos.x, pos.y, this.key, 0);
         shadowSprite.setOrigin(0.5, 1);
-        shadowSprite.alpha = 0.1;
-        shadowSprite.setBlendMode('MULTIPLY');
+        shadowSprite.alpha = 0.75;
+        shadowSprite.setTintFill(0x363636);
         shadowSprite.depth = other.gameObject.depth + 1;
-        shadowSprite.mask = new Phaser.Display.Masks.GeometryMask(
-          scene,
-          new Phaser.GameObjects.Graphics(scene).fillRect(
-            other.gameObject.x,
-            other.gameObject.y,
-            other.gameObject.displayWidth,
-            other.gameObject.displayHeight,
-          ),
-        );
-        // shadowSprite.enableFilters();
-        // shadowSprite.filters?.internal.addMask(other.gameObject);
+        shadowSprite.enableFilters();
+        (shadowSprite.filters as any).external.addMask(other.gameObject);
 
         this.obstructingObjects.set(other.gameObject, shadowSprite);
       }
