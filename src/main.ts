@@ -12,8 +12,9 @@ import { Game, Types } from 'phaser';
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 const config: Types.Core.GameConfig = {
   type: Phaser.WEBGL,
-  width: 800,
-  height: 600,
+  width: 640,
+  height: 480,
+  roundPixels: true,
   parent: 'game-container',
   backgroundColor: '0xeb7725',
   scale: {
@@ -30,5 +31,5 @@ const config: Types.Core.GameConfig = {
   },
   scene: [Boot, Preloader, Glow, Glow2, /* MainMenu, */ MainGame, GameOver],
 };
-
+window.devicePixelRatio = 1;
 export default new Game(config);

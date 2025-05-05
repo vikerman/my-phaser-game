@@ -191,8 +191,10 @@ export class Game extends Scene {
     // 0x191c5c
     // Moonlight
     // 0x04084f
+    // Bright
+    // 0xaaaaaa
 
-    this.lights.enable().setAmbientColor(0xcccccc);
+    this.lights.enable().setAmbientColor(0xaaaaaa);
 
     const playerPos = this.player.getPosition();
     this.playerLight = this.lights.addLight(
@@ -204,6 +206,7 @@ export class Game extends Scene {
       1.5,
       20,
     );
+    // this.playerLight.setVisible(false);
 
     const tween = this.tweens.add({
       targets: this.playerLight,

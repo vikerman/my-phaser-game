@@ -1,12 +1,24 @@
+import { isSafari } from '../utils/useragent';
+
 /**
  * A Character class to hold everything related to a character.
  */
-const WALK_SPEED = 1;
+const WALK_SPEED = 1.5;
 const DIAGONAL_SCALE = 1.0 / Math.SQRT2;
+const SENSOR_WIDTH = 2;
+const SPRITE_Y_ADJUST = 3;
+
+let USE_BITMAP_MASK = !isSafari() && false;
 
 export class Character {
   // Fields
-  private readonly sprite: Phaser.Physics.Matter.Sprite;
+  private feetWidth: number;
+  private feetHeight: number;
+  private readonly container:
+    | Phaser.Physics.Matter.Sprite
+    | Phaser.Physics.Matter.Image
+    | Phaser.GameObjects.GameObject;
+  private readonly sprite: Phaser.GameObjects.Sprite;
   private readonly key: string;
   private cursor: Phaser.Types.Input.Keyboard.CursorKeys | undefined =
     undefined;
@@ -15,6 +27,12 @@ export class Character {
     Phaser.GameObjects.Sprite,
     Phaser.GameObjects.Sprite
   >();
+
+  // Sensors to prevent jitter while walking.
+  private east = 0;
+  private west = 0;
+  private north = 0;
+  private south = 0;
 
   public isMainPlayer;
 
@@ -30,43 +48,147 @@ export class Character {
       height?: number;
     },
   ) {
+    this.isMainPlayer = playerConfig?.mainPlayer ?? false;
+    this.feetWidth = playerConfig?.width ?? 20;
+    this.feetHeight = playerConfig?.height ?? 8;
     this.key = key;
-    this.sprite = scene.matter.add
-      .sprite(playerConfig?.x ?? 0, playerConfig?.y ?? 0, key, 0, {
-        restitution: 0,
-        shape: {
-          type: 'rectangle',
-          width: playerConfig?.width ?? 20,
-          height: playerConfig?.height ?? 8,
-        },
-        render: { sprite: { xOffset: 0, yOffset: 0.5 } },
-      })
-      .setFixedRotation()
+    this.sprite = scene.add
+      .sprite(0, -SPRITE_Y_ADJUST /** TODO: WHY?? **/, key, 0)
       .setLighting(true);
-    (this.sprite.body as MatterJS.BodyType).label = 'character';
 
-    // Add a character hitbox.
-    this.hitBox = scene.matter.add.rectangle(
-      playerConfig?.x ?? 0,
-      playerConfig?.y ?? 0,
+    // Setup a copond body of the main feet collider and various hitbox sensors
+    const Bodies = (Phaser.Physics.Matter as any).Matter
+      .Bodies as Phaser.Physics.Matter.Factory;
+
+    this.hitBox = Bodies.rectangle(
+      0,
+      0,
       this.sprite.displayWidth,
       this.sprite.displayHeight,
-      { isSensor: true },
+      {
+        isSensor: true,
+        label: 'character_hitbox',
+      },
     );
-    this.hitBox.label = 'character_hitbox';
+    const rect = Bodies.rectangle(
+      0,
+      this.sprite.displayHeight / 2 - this.feetHeight / 2 - 1,
+      this.feetWidth,
+      this.feetHeight,
+      {
+        restitution: 0,
+        label: 'character',
+      },
+    );
+
+    const south = Bodies.rectangle(
+      0,
+      this.sprite.displayHeight / 2 + SENSOR_WIDTH / 4 - 1,
+      this.feetWidth - 2,
+      SENSOR_WIDTH,
+      {
+        isSensor: true,
+        label: 'character_s',
+      },
+    );
+
+    const west = Bodies.rectangle(
+      -this.feetWidth / 2 - SENSOR_WIDTH / 4,
+      this.sprite.displayHeight / 2 - this.feetHeight / 2 - 1,
+      SENSOR_WIDTH,
+      this.feetHeight - 2,
+      {
+        isSensor: true,
+        label: 'character_w',
+      },
+    );
+
+    const east = Bodies.rectangle(
+      this.feetWidth / 2 + SENSOR_WIDTH / 4,
+      this.sprite.displayHeight / 2 - this.feetHeight / 2 - 1,
+      SENSOR_WIDTH,
+      this.feetHeight - 2,
+      {
+        isSensor: true,
+        label: 'character_e',
+      },
+    );
+
+    const north = Bodies.rectangle(
+      0,
+      this.sprite.displayHeight / 2 - this.feetHeight - SENSOR_WIDTH / 2,
+      this.feetWidth - 2,
+      SENSOR_WIDTH,
+      {
+        isSensor: true,
+        label: 'character_n',
+      },
+    );
+
+    const compoundBody = (
+      (Phaser.Physics.Matter as any).Matter.Body as any
+    ).create({
+      parts: [this.hitBox, rect, west, east, south, north],
+      inertia: Infinity,
+    });
+
+    const container = scene.add.container(0, 0, [this.sprite]);
+    container.setSize(this.sprite.displayWidth, this.sprite.displayHeight);
+    this.container = scene.matter.add.gameObject(container);
+
+    (this.container as Phaser.Physics.Matter.Sprite).setFixedRotation();
+    (this.container as Phaser.Physics.Matter.Sprite).setExistingBody(
+      compoundBody,
+    );
+    (this.container as Phaser.Physics.Matter.Sprite).setPosition(
+      playerConfig?.x ?? 0,
+      playerConfig?.y ?? 0,
+    );
 
     this.hitBox.onCollideCallback = (pair: MatterJS.IPair) => {
-      this.onCollisionStart(pair);
+      this.onCollide(pair);
+    };
+
+    this.hitBox.onCollideActiveCallback = (pair: MatterJS.IPair) => {
+      this.onCollide(pair);
     };
 
     this.hitBox.onCollideEndCallback = (pair: MatterJS.IPair) => {
-      this.onCollisionEnd(pair);
+      this.onCollideEnd(pair);
+    };
+
+    // Directional sensors
+    north.onCollideCallback = (pair: MatterJS.IPair) => {
+      this.onSensorCollide(pair, 'n');
+    };
+    north.onCollideEndCallback = (pair: MatterJS.IPair) => {
+      this.onSensorCollideEnd(pair, 'n');
+    };
+
+    east.onCollideCallback = (pair: MatterJS.IPair) => {
+      this.onSensorCollide(pair, 'e');
+    };
+    east.onCollideEndCallback = (pair: MatterJS.IPair) => {
+      this.onSensorCollideEnd(pair, 'e');
+    };
+
+    west.onCollideCallback = (pair: MatterJS.IPair) => {
+      this.onSensorCollide(pair, 'w');
+    };
+    west.onCollideEndCallback = (pair: MatterJS.IPair) => {
+      this.onSensorCollideEnd(pair, 'w');
+    };
+
+    south.onCollideCallback = (pair: MatterJS.IPair) => {
+      this.onSensorCollide(pair, 's');
+    };
+    south.onCollideEndCallback = (pair: MatterJS.IPair) => {
+      this.onSensorCollideEnd(pair, 's');
     };
 
     scene.events.on('update', () => {
       this.update();
     });
-    this.isMainPlayer = playerConfig?.mainPlayer ?? false;
   }
 
   setIsMainPlayer(val: boolean): this {
@@ -75,7 +197,7 @@ export class Character {
   }
 
   mainObject(): Phaser.GameObjects.GameObject {
-    return this.sprite;
+    return this.container;
   }
 
   getPosition(): Phaser.Math.Vector2 {
@@ -90,30 +212,58 @@ export class Character {
     return this.sprite.getBounds();
   }
 
-  onCollisionStart(pair: MatterJS.IPair) {
+  private onCollide(pair: MatterJS.IPair) {
     const bodyA = pair.bodyA as MatterJS.BodyType;
     const bodyB = pair.bodyB as MatterJS.BodyType;
 
     const other = bodyA.label == 'character_hitbox' ? bodyB : bodyA;
 
     if (other.label == 'object_sensor' && other.gameObject != null) {
-      if (other.gameObject instanceof Phaser.GameObjects.Sprite) {
+      if (
+        other.gameObject instanceof Phaser.GameObjects.Sprite &&
+        other.gameObject.depth >= this.sprite.depth
+      ) {
+        if (this.obstructingObjects.has(other.gameObject)) {
+          return;
+        }
+
         const scene = this.sprite.scene;
         const pos = this.sprite.getWorldPoint();
-        const shadowSprite = scene.add.sprite(pos.x, pos.y, this.key, 0);
-        shadowSprite.setOrigin(0.5, 1);
-        shadowSprite.alpha = 0.75;
-        shadowSprite.setTintFill(0x363636);
-        shadowSprite.depth = other.gameObject.depth + 1;
-        shadowSprite.enableFilters();
-        (shadowSprite.filters as any).external.addMask(other.gameObject);
 
-        this.obstructingObjects.set(other.gameObject, shadowSprite);
+        if (USE_BITMAP_MASK) {
+          const shadowSprite = scene.add.sprite(pos.x, pos.y, this.key, 0);
+          shadowSprite.depth = other.gameObject.depth + 1;
+          shadowSprite.setLighting(true);
+          shadowSprite.setTintFill(0x111111);
+          shadowSprite.enableFilters();
+          (shadowSprite.filters as any).external.addMask(other.gameObject);
+
+          this.obstructingObjects.set(other.gameObject, shadowSprite);
+        } else {
+          if (this.obstructingObjects.size == 0) {
+            // Create the shadowSprite since once doesn't exist already.
+            const shadowSprite = scene.add.sprite(pos.x, pos.y, this.key, 0);
+            shadowSprite.depth = other.gameObject.depth + 1;
+            shadowSprite.setLighting(true);
+            shadowSprite.setAlpha(0.5);
+            shadowSprite.setBlendMode(Phaser.BlendModes.XOR);
+            this.obstructingObjects.set(other.gameObject, shadowSprite);
+          } else {
+            // Set the existing Sprite
+            const shadowSprite = this.obstructingObjects.values().next().value!;
+
+            // Use the maximum depth!
+            if (other.gameObject.depth + 1 > shadowSprite.depth) {
+              shadowSprite.depth = other.gameObject.depth + 1;
+            }
+            this.obstructingObjects.set(other.gameObject, shadowSprite);
+          }
+        }
       }
     }
   }
 
-  onCollisionEnd(pair: MatterJS.IPair) {
+  private onCollideEnd(pair: MatterJS.IPair) {
     const bodyA = pair.bodyA as MatterJS.BodyType;
     const bodyB = pair.bodyB as MatterJS.BodyType;
 
@@ -125,9 +275,64 @@ export class Character {
       other.gameObject instanceof Phaser.GameObjects.Sprite
     ) {
       const shadowSprite = this.obstructingObjects.get(other.gameObject);
-      if (shadowSprite != null) {
-        shadowSprite.destroy();
-        this.obstructingObjects.delete(other.gameObject);
+      if (USE_BITMAP_MASK) {
+        if (shadowSprite != null) {
+          shadowSprite.destroy();
+        }
+      } else {
+        // Destroy if it's the last element.
+        if (this.obstructingObjects.size == 1) {
+          if (shadowSprite != null) {
+            shadowSprite.destroy();
+          }
+        }
+      }
+      this.obstructingObjects.delete(other.gameObject);
+    }
+  }
+
+  private onSensorCollide(pair: MatterJS.IPair, dir: string) {
+    const bodyA = pair.bodyA as MatterJS.BodyType;
+    const bodyB = pair.bodyB as MatterJS.BodyType;
+
+    const other = bodyA.label == 'character_' + dir ? bodyB : bodyA;
+    if (other.isStatic && !other.isSensor) {
+      switch (dir) {
+        case 'n':
+          this.north++;
+          break;
+        case 'e':
+          this.east++;
+          break;
+        case 'w':
+          this.west++;
+          break;
+        case 's':
+          this.south++;
+          break;
+      }
+    }
+  }
+
+  private onSensorCollideEnd(pair: MatterJS.IPair, dir: string) {
+    const bodyA = pair.bodyA as MatterJS.BodyType;
+    const bodyB = pair.bodyB as MatterJS.BodyType;
+
+    const other = bodyA.label == 'character_' + dir ? bodyB : bodyA;
+    if (other.isStatic && !other.isSensor) {
+      switch (dir) {
+        case 'n':
+          if (this.north > 0) this.north--;
+          break;
+        case 'e':
+          if (this.east > 0) this.east--;
+          break;
+        case 'w':
+          if (this.west > 0) this.west--;
+          break;
+        case 's':
+          if (this.south > 0) this.south--;
+          break;
       }
     }
   }
@@ -153,32 +358,37 @@ export class Character {
       scale = DIAGONAL_SCALE;
     }
 
-    if (this.cursor.left.isDown) {
-      this.sprite.setVelocityX(-WALK_SPEED * scale);
-    } else if (this.cursor.right.isDown) {
-      this.sprite.setVelocityX(WALK_SPEED * scale);
+    const body = this.container as Phaser.Physics.Matter.Sprite;
+    if (this.cursor.left.isDown && this.west == 0) {
+      body.setVelocityX(-WALK_SPEED * scale);
+    } else if (this.cursor.right.isDown && this.east == 0) {
+      body.setVelocityX(WALK_SPEED * scale);
     }
 
-    if (this.cursor.up.isDown) {
-      this.sprite.setVelocityY(-WALK_SPEED * scale);
-    } else if (this.cursor.down.isDown) {
-      this.sprite.setVelocityY(WALK_SPEED * scale);
+    if (this.cursor.up.isDown && this.north == 0) {
+      body.setVelocityY(-WALK_SPEED * scale);
+    } else if (this.cursor.down.isDown && this.south == 0) {
+      body.setVelocityY(WALK_SPEED * scale);
     }
   }
 
   update(): void {
-    this.sprite.setVelocity(0);
+    const body = this.container as Phaser.Physics.Matter.Sprite;
+    body.setVelocity(0);
 
-    const worldPos = this.sprite.getWorldPoint();
-    this.sprite.setDepth(worldPos.y);
+    // Update the depth for sorting the character sprites correctly.
+    const worldPos = body.getWorldPoint();
+    body.setDepth(worldPos.y + this.sprite.displayHeight / 2 - this.feetHeight);
 
-    // Update hitbox location.
-    this.hitBox.position.x = worldPos.x;
-    this.hitBox.position.y = worldPos.y - this.sprite.displayHeight / 2;
-
-    // Update shadow sprites location.
+    // Update shadow sprites location. They are not in the container because they
+    // need maintain their own depth. Works fairly ok.
     for (const s of this.obstructingObjects.values()) {
-      s.setPosition(worldPos.x, worldPos.y);
+      s.setPosition(worldPos.x, worldPos.y - SPRITE_Y_ADJUST);
+      if (!USE_BITMAP_MASK) {
+        // If not using the bitmap mask for the shadow sprite,
+        // We will have only one instance of the shadow sprite.
+        break;
+      }
     }
 
     this.processInput();
