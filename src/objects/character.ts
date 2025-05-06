@@ -10,8 +10,24 @@ const SPRITE_Y_ADJUST = 3;
 
 let USE_BITMAP_MASK = !isSafari() && false;
 
+export const AnimationModes = {
+  NPC: 'NPC',
+} as const;
+
+export type AnimationMode =
+  (typeof AnimationModes)[keyof typeof AnimationModes];
+
+type Direction = 'up' | 'left' | 'down' | 'right';
+
 export class Character {
   // Fields
+  private readonly idleFrames = {
+    down: 0,
+    right: 4,
+    up: 8,
+    left: 12,
+  };
+  private lastDir: Direction = 'down';
   private feetWidth: number;
   private feetHeight: number;
   private readonly container:
@@ -44,14 +60,20 @@ export class Character {
       mainPlayer?: boolean;
       x?: number;
       y?: number;
-      width?: number;
-      height?: number;
+      feetWidth?: number;
+      feetHeight?: number;
+      animationMode?: AnimationMode;
     },
   ) {
     this.isMainPlayer = playerConfig?.mainPlayer ?? false;
-    this.feetWidth = playerConfig?.width ?? 20;
-    this.feetHeight = playerConfig?.height ?? 8;
+    this.feetWidth = playerConfig?.feetWidth ?? 20;
+    this.feetHeight = playerConfig?.feetHeight ?? 8;
     this.key = key;
+    const animationMode = playerConfig?.animationMode ?? AnimationModes.NPC;
+
+    // Create animation keys for the spritesheet.
+    this.createAnimFrames(scene, animationMode);
+
     this.sprite = scene.add
       .sprite(0, -SPRITE_Y_ADJUST /** TODO: WHY?? **/, key, 0)
       .setLighting(true);
@@ -191,25 +213,68 @@ export class Character {
     });
   }
 
-  setIsMainPlayer(val: boolean): this {
+  public setIsMainPlayer(val: boolean): this {
     this.isMainPlayer = val;
     return this;
   }
 
-  mainObject(): Phaser.GameObjects.GameObject {
+  public mainObject(): Phaser.GameObjects.GameObject {
     return this.container;
   }
 
-  getPosition(): Phaser.Math.Vector2 {
+  public getPosition(): Phaser.Math.Vector2 {
     return this.sprite.getWorldPoint();
   }
 
-  getDepth() {
+  public getDepth() {
     return this.sprite.depth;
   }
 
-  getBounds() {
+  public getBounds() {
     return this.sprite.getBounds();
+  }
+
+  private createAnimFrames(scene: Phaser.Scene, animationMode: AnimationMode) {
+    switch (animationMode) {
+      case AnimationModes.NPC:
+        // DOWN
+        scene.anims.create({
+          key: this.key + '_down',
+          frames: scene.anims.generateFrameNumbers(this.key, {
+            frames: [0, 1, 2, 3],
+          }),
+          frameRate: 8,
+          repeat: -1,
+        });
+        // RIGHT
+        scene.anims.create({
+          key: this.key + '_right',
+          frames: scene.anims.generateFrameNumbers(this.key, {
+            frames: [4, 5, 6, 7],
+          }),
+          frameRate: 8,
+          repeat: -1,
+        });
+        // UP
+        scene.anims.create({
+          key: this.key + '_up',
+          frames: scene.anims.generateFrameNumbers(this.key, {
+            frames: [8, 9, 10, 11],
+          }),
+          frameRate: 8,
+          repeat: -1,
+        });
+        // LEFT
+        scene.anims.create({
+          key: this.key + '_left',
+          frames: scene.anims.generateFrameNumbers(this.key, {
+            frames: [12, 13, 14, 15],
+          }),
+          frameRate: 8,
+          repeat: -1,
+        });
+        break;
+    }
   }
 
   private onCollide(pair: MatterJS.IPair) {
@@ -245,7 +310,7 @@ export class Character {
             const shadowSprite = scene.add.sprite(pos.x, pos.y, this.key, 0);
             shadowSprite.depth = other.gameObject.depth + 1;
             shadowSprite.setLighting(true);
-            shadowSprite.setAlpha(0.5);
+            shadowSprite.setAlpha(0.4);
             shadowSprite.setBlendMode(Phaser.BlendModes.XOR);
             this.obstructingObjects.set(other.gameObject, shadowSprite);
           } else {
@@ -337,6 +402,15 @@ export class Character {
     }
   }
 
+  private updateAnimation(moving: boolean, dir: Direction) {
+    if (moving) {
+      this.sprite.play(`${this.key}_${dir}`, true);
+    } else {
+      this.sprite.stop();
+      this.sprite.setFrame(this.idleFrames[this.lastDir]);
+    }
+  }
+
   private processInput() {
     if (!this.isMainPlayer) {
       return;
@@ -358,17 +432,34 @@ export class Character {
       scale = DIAGONAL_SCALE;
     }
 
-    const body = this.container as Phaser.Physics.Matter.Sprite;
-    if (this.cursor.left.isDown && this.west == 0) {
-      body.setVelocityX(-WALK_SPEED * scale);
-    } else if (this.cursor.right.isDown && this.east == 0) {
-      body.setVelocityX(WALK_SPEED * scale);
-    }
+    let dir: Direction = 'down';
+    let moving = false;
 
+    const body = this.container as Phaser.Physics.Matter.Sprite;
     if (this.cursor.up.isDown && this.north == 0) {
       body.setVelocityY(-WALK_SPEED * scale);
+      dir = 'up';
+      moving = true;
     } else if (this.cursor.down.isDown && this.south == 0) {
       body.setVelocityY(WALK_SPEED * scale);
+      dir = 'down';
+      moving = true;
+    }
+
+    if (this.cursor.left.isDown && this.west == 0) {
+      body.setVelocityX(-WALK_SPEED * scale);
+      dir = 'left';
+      moving = true;
+    } else if (this.cursor.right.isDown && this.east == 0) {
+      body.setVelocityX(WALK_SPEED * scale);
+      dir = 'right';
+      moving = true;
+    }
+
+    this.updateAnimation(moving, dir);
+
+    if (moving) {
+      this.lastDir = dir;
     }
   }
 
@@ -384,6 +475,7 @@ export class Character {
     // need maintain their own depth. Works fairly ok.
     for (const s of this.obstructingObjects.values()) {
       s.setPosition(worldPos.x, worldPos.y - SPRITE_Y_ADJUST);
+      s.frame = this.sprite.frame;
       if (!USE_BITMAP_MASK) {
         // If not using the bitmap mask for the shadow sprite,
         // We will have only one instance of the shadow sprite.

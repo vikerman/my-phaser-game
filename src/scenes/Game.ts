@@ -163,7 +163,7 @@ export class Game extends Scene {
 
     // Debug toggle.
     this.matter.world.drawDebug = false;
-    const keyObject = this.input.keyboard?.addKey('Space');
+    const keyObject = this.input.keyboard?.addKey('ESC');
     keyObject?.on('down', () => {
       this.matter.world.drawDebug = !this.matter.world.drawDebug;
       this.matter.world.debugGraphic.clear();
@@ -194,7 +194,7 @@ export class Game extends Scene {
     // Bright
     // 0xaaaaaa
 
-    this.lights.enable().setAmbientColor(0xaaaaaa);
+    this.lights.enable().setAmbientColor(0x191c5c);
 
     const playerPos = this.player.getPosition();
     this.playerLight = this.lights.addLight(
@@ -369,8 +369,8 @@ export class Game extends Scene {
     // Scene PostEffects.
     this.camera.filters.internal
       .addColorMatrix()
-      .colorMatrix.contrast(0.2)
-      .saturate(0.3, true);
+      .colorMatrix.contrast(0.1)
+      .saturate(1.0, true);
   }
 
   private createFromTiles(
