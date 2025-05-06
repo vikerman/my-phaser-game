@@ -402,8 +402,8 @@ export class Character {
     }
   }
 
-  private updateAnimation(moving: boolean, dir: Direction) {
-    if (moving) {
+  private updateAnimation(moving: boolean, dir: Direction | null) {
+    if (moving && dir != null) {
       this.sprite.play(`${this.key}_${dir}`, true);
     } else {
       this.sprite.stop();
@@ -432,33 +432,40 @@ export class Character {
       scale = DIAGONAL_SCALE;
     }
 
-    let dir: Direction = 'down';
+    let dir: Direction | null = null;
     let moving = false;
 
     const body = this.container as Phaser.Physics.Matter.Sprite;
-    if (this.cursor.up.isDown && this.north == 0) {
-      body.setVelocityY(-WALK_SPEED * scale);
+    if (this.cursor.up.isDown) {
       dir = 'up';
-      moving = true;
-    } else if (this.cursor.down.isDown && this.south == 0) {
-      body.setVelocityY(WALK_SPEED * scale);
+      if (this.north == 0) {
+        body.setVelocityY(-WALK_SPEED * scale);
+        moving = true;
+      }
+    } else if (this.cursor.down.isDown) {
       dir = 'down';
-      moving = true;
+      if (this.south == 0) {
+        body.setVelocityY(WALK_SPEED * scale);
+        moving = true;
+      }
     }
 
-    if (this.cursor.left.isDown && this.west == 0) {
-      body.setVelocityX(-WALK_SPEED * scale);
+    if (this.cursor.left.isDown) {
       dir = 'left';
-      moving = true;
-    } else if (this.cursor.right.isDown && this.east == 0) {
-      body.setVelocityX(WALK_SPEED * scale);
+      if (this.west == 0) {
+        body.setVelocityX(-WALK_SPEED * scale);
+        moving = true;
+      }
+    } else if (this.cursor.right.isDown) {
       dir = 'right';
-      moving = true;
+      if (this.east == 0) {
+        body.setVelocityX(WALK_SPEED * scale);
+        moving = true;
+      }
     }
 
     this.updateAnimation(moving, dir);
-
-    if (moving) {
+    if (dir != null) {
       this.lastDir = dir;
     }
   }
