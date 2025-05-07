@@ -194,7 +194,7 @@ export class Game extends Scene {
     // Bright
     // 0xaaaaaa
 
-    this.lights.enable().setAmbientColor(0x191c5c);
+    this.lights.enable().setAmbientColor(0xaaaaaa);
 
     const playerPos = this.player.getPosition();
     this.playerLight = this.lights.addLight(
@@ -202,7 +202,7 @@ export class Game extends Scene {
       playerPos.y - 8,
       128,
       // 0x11cccc,
-      0xbb6611,
+      0xffa500,
       1.5,
       20,
     );
@@ -370,7 +370,7 @@ export class Game extends Scene {
     this.camera.filters.internal
       .addColorMatrix()
       .colorMatrix.contrast(0.1)
-      .saturate(1.0, true);
+      .saturate(0.3, true);
   }
 
   private createFromTiles(

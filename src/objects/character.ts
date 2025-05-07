@@ -34,6 +34,7 @@ export class Character {
     | Phaser.Physics.Matter.Sprite
     | Phaser.Physics.Matter.Image
     | Phaser.GameObjects.GameObject;
+  private readonly shadowSprite: Phaser.GameObjects.Sprite;
   private readonly sprite: Phaser.GameObjects.Sprite;
   private readonly key: string;
   private cursor: Phaser.Types.Input.Keyboard.CursorKeys | undefined =
@@ -73,6 +74,15 @@ export class Character {
 
     // Create animation keys for the spritesheet.
     this.createAnimFrames(scene, animationMode);
+
+    this.shadowSprite = scene.add
+      .sprite(0, SPRITE_Y_ADJUST + 5 /** TODO: WHY?? **/, key, 0)
+      .setOrigin(0.5, 1)
+      .setScale(0.7, 1.5)
+      .setRotation((3 * Math.PI) / 4)
+      .setTint(0x000000)
+      .setAlpha(0, 0, 0.5, 0.5)
+      .setLighting(true);
 
     this.sprite = scene.add
       .sprite(0, -SPRITE_Y_ADJUST /** TODO: WHY?? **/, key, 0)
@@ -154,7 +164,10 @@ export class Character {
       inertia: Infinity,
     });
 
-    const container = scene.add.container(0, 0, [this.sprite]);
+    const container = scene.add.container(0, 0, [
+      this.shadowSprite,
+      this.sprite,
+    ]);
     container.setSize(this.sprite.displayWidth, this.sprite.displayHeight);
     this.container = scene.matter.add.gameObject(container);
 
@@ -296,32 +309,34 @@ export class Character {
         const pos = this.sprite.getWorldPoint();
 
         if (USE_BITMAP_MASK) {
-          const shadowSprite = scene.add.sprite(pos.x, pos.y, this.key, 0);
-          shadowSprite.depth = other.gameObject.depth + 1;
-          shadowSprite.setLighting(true);
-          shadowSprite.setTintFill(0x111111);
-          shadowSprite.enableFilters();
-          (shadowSprite.filters as any).external.addMask(other.gameObject);
+          const occlusionSprite = scene.add.sprite(pos.x, pos.y, this.key, 0);
+          occlusionSprite.depth = other.gameObject.depth + 1;
+          occlusionSprite.setLighting(true);
+          occlusionSprite.setTintFill(0x111111);
+          occlusionSprite.enableFilters();
+          (occlusionSprite.filters as any).external.addMask(other.gameObject);
 
-          this.obstructingObjects.set(other.gameObject, shadowSprite);
+          this.obstructingObjects.set(other.gameObject, occlusionSprite);
         } else {
           if (this.obstructingObjects.size == 0) {
-            // Create the shadowSprite since once doesn't exist already.
-            const shadowSprite = scene.add.sprite(pos.x, pos.y, this.key, 0);
-            shadowSprite.depth = other.gameObject.depth + 1;
-            shadowSprite.setLighting(true);
-            shadowSprite.setAlpha(0.4);
-            shadowSprite.setBlendMode(Phaser.BlendModes.XOR);
-            this.obstructingObjects.set(other.gameObject, shadowSprite);
+            // Create the occlusion sprite since once doesn't exist already.
+            const occlusionSprite = scene.add.sprite(pos.x, pos.y, this.key, 0);
+            occlusionSprite.depth = other.gameObject.depth + 1;
+            occlusionSprite.setLighting(true);
+            occlusionSprite.setAlpha(0.4);
+            occlusionSprite.setBlendMode(Phaser.BlendModes.XOR);
+            this.obstructingObjects.set(other.gameObject, occlusionSprite);
           } else {
             // Set the existing Sprite
-            const shadowSprite = this.obstructingObjects.values().next().value!;
+            const occlusionSprite = this.obstructingObjects
+              .values()
+              .next().value!;
 
             // Use the maximum depth!
-            if (other.gameObject.depth + 1 > shadowSprite.depth) {
-              shadowSprite.depth = other.gameObject.depth + 1;
+            if (other.gameObject.depth + 1 > occlusionSprite.depth) {
+              occlusionSprite.depth = other.gameObject.depth + 1;
             }
-            this.obstructingObjects.set(other.gameObject, shadowSprite);
+            this.obstructingObjects.set(other.gameObject, occlusionSprite);
           }
         }
       }
@@ -339,16 +354,16 @@ export class Character {
       other.gameObject != null &&
       other.gameObject instanceof Phaser.GameObjects.Sprite
     ) {
-      const shadowSprite = this.obstructingObjects.get(other.gameObject);
+      const occlusionSprite = this.obstructingObjects.get(other.gameObject);
       if (USE_BITMAP_MASK) {
-        if (shadowSprite != null) {
-          shadowSprite.destroy();
+        if (occlusionSprite != null) {
+          occlusionSprite.destroy();
         }
       } else {
         // Destroy if it's the last element.
         if (this.obstructingObjects.size == 1) {
-          if (shadowSprite != null) {
-            shadowSprite.destroy();
+          if (occlusionSprite != null) {
+            occlusionSprite.destroy();
           }
         }
       }
@@ -478,7 +493,7 @@ export class Character {
     const worldPos = body.getWorldPoint();
     body.setDepth(worldPos.y + this.sprite.displayHeight / 2 - this.feetHeight);
 
-    // Update shadow sprites location. They are not in the container because they
+    // Update occlusion sprites location. They are not in the container because they
     // need maintain their own depth. Works fairly ok.
     for (const s of this.obstructingObjects.values()) {
       s.setPosition(worldPos.x, worldPos.y - SPRITE_Y_ADJUST);
@@ -489,6 +504,8 @@ export class Character {
         break;
       }
     }
+
+    this.shadowSprite.frame = this.sprite.frame;
 
     this.processInput();
   }
