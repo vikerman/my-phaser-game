@@ -30,7 +30,7 @@
         },
         "public/assets/maps/forest.tmj#forest": {
             "scaleInDock": 1,
-            "scaleInEditor": 5.5
+            "scaleInEditor": 1
         },
         "public/assets/maps/forest.tmj#gentle forest v01": {
             "scaleInEditor": 1
@@ -38,6 +38,9 @@
         "public/assets/maps/forest.tmj#items": {
             "scaleInDock": 1,
             "scaleInEditor": 1
+        },
+        "public/assets/maps/forest.tmj#objects1": {
+            "scaleInEditor": 5.5
         },
         "public/assets/maps/forest.tmj#trees": {
             "scaleInEditor": 1
@@ -56,7 +59,7 @@
     ],
     "tileset.embedInMap": true,
     "tileset.tileSize": {
-        "height": 16,
-        "width": 16
+        "height": 96,
+        "width": 80
     }
 }
