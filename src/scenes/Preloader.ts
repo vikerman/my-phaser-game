@@ -48,6 +48,7 @@ export class Preloader extends Scene {
     );
 
     this.load.image('shadow_sprite', 'characters/shadow_sprite.png');
+    this.load.image('vignette', 'vignette.png');
 
     this.load.spritesheet('king', 'characters/npc/npc king A v03.png', {
       frameWidth: 32,

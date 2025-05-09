@@ -1,5 +1,6 @@
 const SHADOW_SCALE_BASE_RADIUS = 128;
-const SHADOW_ALPHA_MAX = 0.7;
+const SHADOW_ALPHA_MAX = 0.8;
+const SHADOW_FALLLOFF_RATE = 1.5;
 
 export class ObjectBase extends Phaser.GameObjects.Sprite {
   private readonly shadowSprites = new Map<
@@ -66,14 +67,20 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
       // Set the length of shadow based on distance.
       const yScale =
         ((dist / l.radius) * 2 * l.radius) / SHADOW_SCALE_BASE_RADIUS;
-      shadowSprite.setScale(0.8, Math.max(yScale * 1.5, 1));
+      shadowSprite.setScale(1, Math.max(yScale, 1));
 
       // Set the strength based on distance
-      const alpha1 = Math.max(SHADOW_ALPHA_MAX - dist / l.radius, 0);
-      let alpha2 = Math.max(
-        SHADOW_ALPHA_MAX - (dist + shadowSprite.displayHeight) / l.radius,
-        0,
-      );
+      const alpha1 =
+        (Math.max(SHADOW_ALPHA_MAX - dist / l.radius, 0) * l.intensity) / 2;
+      let alpha2 =
+        (Math.max(
+          SHADOW_ALPHA_MAX -
+            (dist + shadowSprite.displayHeight * SHADOW_FALLLOFF_RATE) /
+              l.radius,
+          0,
+        ) *
+          l.intensity) /
+        2;
       shadowSprite.setAlpha(alpha2, alpha2, alpha1, alpha1);
 
       // Set the frame

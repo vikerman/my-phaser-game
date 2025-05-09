@@ -8,7 +8,7 @@ const DIAGONAL_SCALE = 1.0 / Math.SQRT2;
 const SENSOR_WIDTH = 2;
 const SPRITE_Y_ADJUST = 3;
 const SHADOW_SCALE_BASE_RADIUS = 128;
-const SHADOW_ALPHA_MAX = 0.85;
+const SHADOW_ALPHA_MAX = 0.7;
 
 let USE_BITMAP_MASK = !isSafari() && false;
 
@@ -553,16 +553,23 @@ export class Character {
       shadowSprite.setRotation(angle);
 
       // Set the length of shadow based on distance.
-      const yScale =
-        ((dist / l.radius) * 2 * l.radius) / SHADOW_SCALE_BASE_RADIUS;
-      shadowSprite.setScale(0.6, yScale);
+      const yScale = Math.max(
+        ((dist / l.radius) * 2 * l.radius) / SHADOW_SCALE_BASE_RADIUS,
+        1,
+      );
+      shadowSprite.setScale(1, yScale);
 
       // Set the strength based on distance
-      const alpha1 = Math.max(SHADOW_ALPHA_MAX - dist / l.radius, 0);
-      let alpha2 = Math.max(
-        SHADOW_ALPHA_MAX - (dist + shadowSprite.displayHeight) / l.radius,
-        0,
-      );
+      const alpha1 =
+        (Math.max(SHADOW_ALPHA_MAX - dist / l.radius, 0) * l.intensity) / 2;
+      let alpha2 =
+        (Math.max(
+          SHADOW_ALPHA_MAX -
+            (dist + shadowSprite.displayHeight * 1.5) / l.radius,
+          0,
+        ) *
+          l.intensity) /
+        2;
       // alpha2 *= Math.sqrt(alpha2);
       shadowSprite.setAlpha(alpha2, alpha2, alpha1, alpha1);
 

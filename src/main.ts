@@ -22,6 +22,7 @@ const config: Types.Core.GameConfig = {
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   pixelArt: true,
+  // don't use smoothPixelArt
   physics: {
     default: 'matter',
     matter: {

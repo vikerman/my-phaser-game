@@ -14,6 +14,7 @@ export class Game extends Scene {
     | Phaser.Sound.WebAudioSound;
   waterfallPos: Phaser.Math.Vector2;
   sprites: Phaser.GameObjects.Sprite[];
+  vignette: Phaser.GameObjects.Image;
 
   constructor() {
     super('Game');
@@ -30,14 +31,16 @@ export class Game extends Scene {
 
     this.matter.world.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     for (const layer of map.layers) {
-      const ground = map
+      const layerObj = map
         .createLayer(layer.name, map.tilesets, 0, 0)
         .setLighting(true);
       // Add colliders from the tilemap layers
-      ground?.setCollisionFromCollisionGroup();
+      layerObj?.setCollisionFromCollisionGroup();
       this.matter.world.convertTilemapLayer(
-        ground as Phaser.Tilemaps.TilemapLayer,
+        layerObj as Phaser.Tilemaps.TilemapLayer,
       );
+      // layerObj.enableFilters();
+      // layerObj.filters?.internal.addColorMatrix().colorMatrix.brightness(0.9);
     }
 
     // Add objects and their colliders from the `objects` layer.
@@ -72,15 +75,15 @@ export class Game extends Scene {
     // 0x04084f
     // Bright
     // 0xaaaaaa
-    this.lights.enable().setAmbientColor(0x191c5c);
+    this.lights.enable().setAmbientColor(0xaaaaaa);
 
     const playerPos = this.player.getPosition();
     this.playerLight = this.lights.addLight(
-      playerPos.x,
-      playerPos.y,
+      playerPos.x + 4,
+      playerPos.y + 8,
       256,
       0xffa500,
-      2,
+      1.5,
       20,
     );
     // this.playerLight.setVisible(false);
@@ -101,11 +104,12 @@ export class Game extends Scene {
     const fixedLight = this.lights.addLight(
       playerPos.x - 200,
       playerPos.y + 200,
-      256,
+      512,
       0xffa500,
-      2,
+      1.5,
       20,
     );
+    // fixedLight.setVisible(false);
     const tween2 = this.tweens.add({
       targets: fixedLight,
       ease: 'Bounce',
@@ -140,24 +144,37 @@ export class Game extends Scene {
       volume: 0.25,
     });
     this.waterfall.play();
-    this.waterfallPos = new Phaser.Math.Vector2(900, 300);
+    this.waterfallPos = new Phaser.Math.Vector2(1000, 300);
+
+    // Vignette
+    this.vignette = this.add.image(0, 0, 'vignette');
+    this.vignette.setScale(720 / 800);
+    this.vignette.depth = 1000000;
+    this.vignette.setAlpha(0.4);
+    this.vignette.enableFilters();
+    this.vignette.filters?.internal.addBlur(2, 2, 2, 3.75);
 
     // Scene PostEffects.
-    this.camera.filters.internal
-      .addColorMatrix()
-      .colorMatrix.contrast(0.1)
-      .saturate(0.3, true);
+    // (this.camera.filters as any).internal
+    //   .addColorMatrix()
+    //   .colorMatrix.contrast(0.1)
+    //   .saturate(0.2, true);
+
+    // this.camera.filters.internal.addTiltShift(0.9, 2, 0.4, 0.4, 0.4, 0.5);
   }
 
   override update() {
     const playerPos = this.player.getPosition();
-    this.playerLight.x = playerPos.x;
-    this.playerLight.y = playerPos.y + 16;
+    this.playerLight.x = playerPos.x + 4;
+    this.playerLight.y = playerPos.y + 8;
 
     const dist = this.waterfallPos.distance(this.player.getPosition());
     if (dist != 0) {
       let vol = Math.max(0, Math.min(1, 50 / dist));
       this.waterfall.setVolume(vol);
     }
+
+    this.vignette.x = this.camera.worldView.centerX;
+    this.vignette.y = this.camera.worldView.centerY;
   }
 }
