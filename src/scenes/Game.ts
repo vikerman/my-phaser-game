@@ -75,7 +75,7 @@ export class Game extends Scene {
     // 0x04084f
     // Bright
     // 0xaaaaaa
-    this.lights.enable().setAmbientColor(0x191c5c);
+    this.lights.enable().setAmbientColor(0x04084f);
 
     const playerPos = this.player.getPosition();
     this.playerLight = this.lights.addLight(
@@ -84,7 +84,7 @@ export class Game extends Scene {
       256,
       0xffa500,
       1.5,
-      20,
+      23,
     );
     // this.playerLight.setVisible(false);
 
@@ -107,7 +107,7 @@ export class Game extends Scene {
       512,
       0xffa500,
       1.5,
-      20,
+      23,
     );
     // fixedLight.setVisible(false);
     const tween2 = this.tweens.add({
@@ -155,13 +155,14 @@ export class Game extends Scene {
     this.vignette.filters?.internal.addBlur(2, 2, 2, 3.75);
 
     // Scene PostEffects.
-    // (this.camera.filters as any).internal
-    //   .addColorMatrix()
-    //   .colorMatrix.contrast(0.1)
-    //   .saturate(0.2, true);
 
     // this.camera.filters.internal.addTiltShift(0.9, 2, 0.4, 0.4, 0.4, 0.5);
-    // this.camera.filters.internal.addBokeh(0.1);
+
+    // So much better in low light!!!
+    this.camera.filters.internal.addThreshold(0.05, 0.5);
+
+    // Daytime
+    // this.camera.filters.internal.addThreshold(0.05, 0.9);
   }
 
   override update() {
