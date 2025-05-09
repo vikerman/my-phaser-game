@@ -97,6 +97,27 @@ export class Game extends Scene {
       },
     });
 
+    // Add a fixed light.
+    const fixedLight = this.lights.addLight(
+      playerPos.x - 200,
+      playerPos.y + 200,
+      256,
+      0xffa500,
+      2,
+      20,
+    );
+    const tween2 = this.tweens.add({
+      targets: fixedLight,
+      ease: 'Bounce',
+      intensity: 0.5,
+      yoyo: true,
+      repeat: -1,
+      duration: 1200,
+      onRepeat: () => {
+        tween2.duration = 100 + Math.random() * 900;
+      },
+    });
+
     // Sounds
 
     // Fire idle sound

@@ -7,6 +7,8 @@ const WALK_SPEED = 1.5;
 const DIAGONAL_SCALE = 1.0 / Math.SQRT2;
 const SENSOR_WIDTH = 2;
 const SPRITE_Y_ADJUST = 3;
+const SHADOW_SCALE_BASE_RADIUS = 128;
+const SHADOW_ALPHA_MAX = 0.85;
 
 let USE_BITMAP_MASK = !isSafari() && false;
 
@@ -20,7 +22,8 @@ export type AnimationMode =
 type Direction = 'up' | 'left' | 'down' | 'right';
 
 export class Character {
-  // Fields
+  // Field
+  private readonly scene: Phaser.Scene;
   private readonly idleFrames = {
     down: 0,
     right: 4,
@@ -34,7 +37,10 @@ export class Character {
     | Phaser.Physics.Matter.Sprite
     | Phaser.Physics.Matter.Image
     | Phaser.GameObjects.GameObject;
-  private readonly shadowSprite: Phaser.GameObjects.Sprite;
+  private readonly shadowSprites = new Map<
+    Phaser.GameObjects.Light,
+    Phaser.GameObjects.Sprite
+  >();
   private readonly sprite: Phaser.GameObjects.Sprite;
   private readonly key: string;
   private cursor: Phaser.Types.Input.Keyboard.CursorKeys | undefined =
@@ -66,6 +72,7 @@ export class Character {
       animationMode?: AnimationMode;
     },
   ) {
+    this.scene = scene;
     this.isMainPlayer = playerConfig?.mainPlayer ?? false;
     this.feetWidth = playerConfig?.feetWidth ?? 20;
     this.feetHeight = playerConfig?.feetHeight ?? 8;
@@ -74,15 +81,6 @@ export class Character {
 
     // Create animation keys for the spritesheet.
     this.createAnimFrames(scene, animationMode);
-
-    this.shadowSprite = scene.add
-      .sprite(0, SPRITE_Y_ADJUST + 5 /** TODO: WHY?? **/, key, 0)
-      .setOrigin(0.5, 1)
-      .setScale(0.7, 1.5)
-      .setRotation((3 * Math.PI) / 4)
-      .setTint(0x000000)
-      .setAlpha(0, 0, 0.5, 0.5)
-      .setLighting(true);
 
     this.sprite = scene.add
       .sprite(0, -SPRITE_Y_ADJUST /** TODO: WHY?? **/, key, 0)
@@ -164,10 +162,7 @@ export class Character {
       inertia: Infinity,
     });
 
-    const container = scene.add.container(0, 0, [
-      this.shadowSprite,
-      this.sprite,
-    ]);
+    const container = scene.add.container(0, 0, [this.sprite]);
     container.setSize(this.sprite.displayWidth, this.sprite.displayHeight);
     this.container = scene.matter.add.gameObject(container);
 
@@ -305,11 +300,15 @@ export class Character {
           return;
         }
 
-        const scene = this.sprite.scene;
         const pos = this.sprite.getWorldPoint();
 
         if (USE_BITMAP_MASK) {
-          const occlusionSprite = scene.add.sprite(pos.x, pos.y, this.key, 0);
+          const occlusionSprite = this.scene.add.sprite(
+            pos.x,
+            pos.y,
+            this.key,
+            0,
+          );
           occlusionSprite.depth = other.gameObject.depth + 1;
           occlusionSprite.setLighting(true);
           occlusionSprite.setTintFill(0x111111);
@@ -320,7 +319,12 @@ export class Character {
         } else {
           if (this.obstructingObjects.size == 0) {
             // Create the occlusion sprite since once doesn't exist already.
-            const occlusionSprite = scene.add.sprite(pos.x, pos.y, this.key, 0);
+            const occlusionSprite = this.scene.add.sprite(
+              pos.x,
+              pos.y,
+              this.key,
+              0,
+            );
             occlusionSprite.depth = other.gameObject.depth + 1;
             occlusionSprite.setLighting(true);
             occlusionSprite.setAlpha(0.4);
@@ -505,7 +509,66 @@ export class Character {
       }
     }
 
-    this.shadowSprite.frame = this.sprite.frame;
+    // Create shadow for each light in the scene - if within the light radius.
+    for (const light of this.scene.lights.getLights(
+      this.scene.cameras.main,
+    ) as never[]) {
+      const l: Phaser.GameObjects.Light = (light as any).light;
+      const charPos = new Phaser.Math.Vector2(worldPos);
+
+      // Calculate angle between light and character. (Note: charPos is mutated.)
+      charPos
+        .add({ x: 0, y: this.sprite.displayHeight / 2 })
+        .subtract({ x: l.x, y: l.y });
+      const dist = charPos.length();
+      let dir = charPos.normalize();
+      let shadowSprite = this.shadowSprites.get(l);
+
+      if (!l.visible || dist > l.radius) {
+        if (shadowSprite != null) {
+          this.shadowSprites.delete(l);
+          shadowSprite.destroy();
+        }
+        continue;
+      }
+
+      if (shadowSprite == null) {
+        shadowSprite = this.scene.add
+          .sprite(0, SPRITE_Y_ADJUST + 5 /** TODO: WHY?? **/, this.key, 0)
+          .setOrigin(0.5, 1)
+          .setTint(0x000000)
+          .setLighting(true);
+        this.shadowSprites.set(l, shadowSprite);
+        (this.container as Phaser.GameObjects.Container)
+          .add(shadowSprite)
+          .moveBelow(shadowSprite, this.sprite);
+      }
+
+      // Set the Angle based on direction from light.
+      // toFixed returns and string. The + converts it back to number.
+      let angle = +Math.acos(-dir.y).toFixed(3);
+      if (dir.x < 0) {
+        angle = -angle;
+      }
+      shadowSprite.setRotation(angle);
+
+      // Set the length of shadow based on distance.
+      const yScale =
+        ((dist / l.radius) * 2 * l.radius) / SHADOW_SCALE_BASE_RADIUS;
+      shadowSprite.setScale(0.6, yScale);
+
+      // Set the strength based on distance
+      const alpha1 = Math.max(SHADOW_ALPHA_MAX - dist / l.radius, 0);
+      let alpha2 = Math.max(
+        SHADOW_ALPHA_MAX - (dist + shadowSprite.displayHeight) / l.radius,
+        0,
+      );
+      // alpha2 *= Math.sqrt(alpha2);
+      shadowSprite.setAlpha(alpha2, alpha2, alpha1, alpha1);
+
+      // Set the frame
+      shadowSprite.frame = this.sprite.frame;
+    }
 
     this.processInput();
   }
