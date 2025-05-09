@@ -1,5 +1,7 @@
 // Utility functions for working with Object Layer of a Tilemap
 
+import { ObjectBase } from '../objects/objectBase';
+
 function createObjectLayer(
   map: Phaser.Tilemaps.Tilemap,
   layer: string,
@@ -10,11 +12,11 @@ function createObjectLayer(
     return objectLayer;
   }
 
-  const objectConfigs = [] as Array<{ gid: number }>;
+  const objectConfigs = [] as Array<{ gid: number; classType: Function }>;
 
   for (const ts of tilesets) {
     for (let i = 0; i <= ts.total; i++) {
-      objectConfigs.push({ gid: ts.firstgid + i });
+      objectConfigs.push({ gid: ts.firstgid + i, classType: ObjectBase });
     }
   }
 
@@ -112,16 +114,6 @@ function createFromCollisionObjects(
     //   parts.push(body);
     // }
   }
-
-  // if (parts.length === 1) {
-  //   this.setBody(parts[0], options.addToWorld);
-  // } else if (parts.length > 1) {
-  //   var tempOptions = DeepCopy(options);
-
-  //   tempOptions.parts = parts;
-
-  //   this.setBody(Body.create(tempOptions), tempOptions.addToWorld);
-  // }
 }
 
 function convertObjectLayer(

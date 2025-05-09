@@ -3,7 +3,7 @@ import { isSafari } from '../utils/useragent';
 /**
  * A Character class to hold everything related to a character.
  */
-const WALK_SPEED = 1.5;
+const WALK_SPEED = 1;
 const DIAGONAL_SCALE = 1.0 / Math.SQRT2;
 const SENSOR_WIDTH = 2;
 const SPRITE_Y_ADJUST = 3;
