@@ -1,6 +1,6 @@
 const SHADOW_SCALE_BASE_RADIUS = 128;
 const SHADOW_ALPHA_MAX = 0.8;
-const SHADOW_FALLLOFF_RATE = 1.5;
+const SHADOW_FALLLOFF_RATE = 1.4;
 
 export class ObjectBase extends Phaser.GameObjects.Sprite {
   private readonly shadowSprites = new Map<

@@ -75,7 +75,7 @@ export class Game extends Scene {
     // 0x04084f
     // Bright
     // 0xaaaaaa
-    this.lights.enable().setAmbientColor(0xaaaaaa);
+    this.lights.enable().setAmbientColor(0x191c5c);
 
     const playerPos = this.player.getPosition();
     this.playerLight = this.lights.addLight(
@@ -161,6 +161,7 @@ export class Game extends Scene {
     //   .saturate(0.2, true);
 
     // this.camera.filters.internal.addTiltShift(0.9, 2, 0.4, 0.4, 0.4, 0.5);
+    // this.camera.filters.internal.addBokeh(0.1);
   }
 
   override update() {

@@ -8,7 +8,8 @@ const DIAGONAL_SCALE = 1.0 / Math.SQRT2;
 const SENSOR_WIDTH = 2;
 const SPRITE_Y_ADJUST = 3;
 const SHADOW_SCALE_BASE_RADIUS = 128;
-const SHADOW_ALPHA_MAX = 0.7;
+const SHADOW_ALPHA_MAX = 0.8;
+const SHADOW_FALLLOFF_RATE = 1.4;
 
 let USE_BITMAP_MASK = !isSafari() && false;
 
@@ -565,7 +566,8 @@ export class Character {
       let alpha2 =
         (Math.max(
           SHADOW_ALPHA_MAX -
-            (dist + shadowSprite.displayHeight * 1.5) / l.radius,
+            (dist + shadowSprite.displayHeight * SHADOW_FALLLOFF_RATE) /
+              l.radius,
           0,
         ) *
           l.intensity) /
