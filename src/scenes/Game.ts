@@ -75,7 +75,7 @@ export class Game extends Scene {
     // 0x04084f
     // Bright
     // 0xaaaaaa
-    this.lights.enable().setAmbientColor(0xcccccc);
+    this.lights.enable().setAmbientColor(0xaaaaaa);
 
     const playerPos = this.player.getPosition();
     this.playerLight = this.lights.addLight(
@@ -159,7 +159,7 @@ export class Game extends Scene {
       .hue(20)
       .brightness(1, true);
 
-    this.camera.filters.internal.addTiltShift(0.35, 2, 0, 0.4, 0.4, 0.9);
+    this.camera.filters.internal.addTiltShift(0.4, 2, 0, 0.4, 0.4, 0.9);
 
     // So much better in low light!!!
     // this.camera.filters.internal.addThreshold(0.05, 0.5);
