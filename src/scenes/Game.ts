@@ -159,7 +159,7 @@ export class Game extends Scene {
       .saturate(-0.3)
       .brightness(1.2, true);
 
-    this.camera.filters.internal.addTiltShift(0.4, 2, 0, 0.5, 0.5, 0.9);
+    this.camera.filters.internal.addTiltShift(0.4, 2, 0, 0, 0.4, 0.9);
 
     // So much better in low light!!!
     // this.camera.filters.internal.addThreshold(0.05, 0.5);
