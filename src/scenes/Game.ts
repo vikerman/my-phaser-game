@@ -74,19 +74,19 @@ export class Game extends Scene {
     // Moonlight
     // 0x04084f
     // Bright
-    // 0xaaaaaa
-    this.lights.enable().setAmbientColor(0xcccccc);
+    // 0xcccccc
+    this.lights.enable().setAmbientColor(0x191c5c);
 
     const playerPos = this.player.getPosition();
     this.playerLight = this.lights.addLight(
       playerPos.x + 4,
       playerPos.y + 8,
-      256,
+      512,
       0xffa500,
-      0.6,
+      1,
       23,
     );
-    this.playerLight.setVisible(false);
+    // this.playerLight.setVisible(false);
 
     const tween = this.tweens.add({
       targets: this.playerLight,
@@ -106,10 +106,10 @@ export class Game extends Scene {
       playerPos.y + 200,
       512,
       0xffa500,
-      1,
-      40,
+      0.7,
+      100,
     );
-    fixedLight.setVisible(false);
+    // fixedLight.setVisible(false);
     const tween2 = this.tweens.add({
       targets: fixedLight,
       ease: 'Bounce',
@@ -162,10 +162,10 @@ export class Game extends Scene {
     this.camera.filters.internal.addTiltShift(0.4, 2, 0, 0, 0.4, 0.9);
 
     // So much better in low light!!!
-    // this.camera.filters.internal.addThreshold(0.05, 0.5);
+    this.camera.filters.internal.addThreshold(0.05, 0.5);
 
     // Daytime
-    this.camera.filters.internal.addThreshold(0.05, 0.9);
+    // this.camera.filters.internal.addThreshold(0.05, 0.9);
   }
 
   override update() {

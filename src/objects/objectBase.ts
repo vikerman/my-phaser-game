@@ -19,7 +19,6 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
     // Create shadow for each light in the scene - if within the light radius.
     const worldPos = this.getWorldPoint();
 
-    /*
     for (const light of this.scene.lights.getLights(
       this.scene.cameras.main,
     ) as never[]) {
@@ -86,6 +85,5 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
       // Set the frame
       shadowSprite.frame = this.frame;
     }
-      */
   }
 }
