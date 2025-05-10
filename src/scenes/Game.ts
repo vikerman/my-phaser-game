@@ -148,7 +148,7 @@ export class Game extends Scene {
 
     // Vignette
     this.vignette = this.add.image(0, 0, 'vignette');
-    this.vignette.setScale((800 / 640) * 1.05);
+    this.vignette.setScale(1.05);
     this.vignette.setAlpha(0.85);
     this.vignette.depth = 1000000;
 
@@ -157,7 +157,7 @@ export class Game extends Scene {
       .addColorMatrix()
       .colorMatrix.hue(20)
       .saturate(-0.3)
-      .brightness(1.5, true);
+      .brightness(1.1, true);
 
     this.camera.filters.internal.addTiltShift(0.4, 2, 0, 0, 0.4, 0.9);
 
