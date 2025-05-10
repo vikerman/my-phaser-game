@@ -12,13 +12,12 @@ import { Game, Types } from 'phaser';
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 const config: Types.Core.GameConfig = {
   type: Phaser.WEBGL,
-  width: 640,
-  height: 480,
+  width: 800,
+  height: 600,
   roundPixels: true,
   parent: 'game-container',
-  // backgroundColor: '0x222222',
   scale: {
-    mode: Phaser.Scale.FIT,
+    mode: Phaser.Scale.ENVELOP,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   pixelArt: true,
