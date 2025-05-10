@@ -75,7 +75,7 @@ export class Game extends Scene {
     // 0x04084f
     // Bright
     // 0xaaaaaa
-    this.lights.enable().setAmbientColor(0xaaaaaa);
+    this.lights.enable().setAmbientColor(0xcccccc);
 
     const playerPos = this.player.getPosition();
     this.playerLight = this.lights.addLight(
@@ -109,7 +109,7 @@ export class Game extends Scene {
       1,
       40,
     );
-    // fixedLight.setVisible(false);
+    fixedLight.setVisible(false);
     const tween2 = this.tweens.add({
       targets: fixedLight,
       ease: 'Bounce',
@@ -149,7 +149,7 @@ export class Game extends Scene {
     // Vignette
     this.vignette = this.add.image(0, 0, 'vignette');
     this.vignette.setScale((800 / 640) * 1.05);
-    this.vignette.setAlpha(0.8);
+    this.vignette.setAlpha(0.85);
     this.vignette.depth = 1000000;
 
     // Scene PostEffects.
@@ -157,7 +157,7 @@ export class Game extends Scene {
       .addColorMatrix()
       .colorMatrix.hue(20)
       .saturate(-0.3)
-      .brightness(1.2, true);
+      .brightness(1.5, true);
 
     this.camera.filters.internal.addTiltShift(0.4, 2, 0, 0, 0.4, 0.9);
 
