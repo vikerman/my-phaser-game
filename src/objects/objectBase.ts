@@ -1,5 +1,5 @@
-const SHADOW_SCALE_BASE_RADIUS = 128;
-const SHADOW_ALPHA_MAX = 0.8;
+const SHADOW_SCALE_BASE_RADIUS = 64;
+const SHADOW_ALPHA_MAX = 0.9;
 const SHADOW_FALLLOFF_RATE = 1.4;
 
 export class ObjectBase extends Phaser.GameObjects.Sprite {
@@ -19,6 +19,7 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
     // Create shadow for each light in the scene - if within the light radius.
     const worldPos = this.getWorldPoint();
 
+    /*
     for (const light of this.scene.lights.getLights(
       this.scene.cameras.main,
     ) as never[]) {
@@ -65,8 +66,7 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
       shadowSprite.setRotation(angle);
 
       // Set the length of shadow based on distance.
-      const yScale =
-        ((dist / l.radius) * 2 * l.radius) / SHADOW_SCALE_BASE_RADIUS;
+      const yScale = dist / SHADOW_SCALE_BASE_RADIUS;
       shadowSprite.setScale(1, Math.max(yScale, 1));
 
       // Set the strength based on distance
@@ -86,5 +86,6 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
       // Set the frame
       shadowSprite.frame = this.frame;
     }
+      */
   }
 }

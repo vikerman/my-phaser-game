@@ -83,7 +83,7 @@ export class Game extends Scene {
       playerPos.y + 8,
       256,
       0xffa500,
-      1.5,
+      0.6,
       23,
     );
     // this.playerLight.setVisible(false);
@@ -106,8 +106,8 @@ export class Game extends Scene {
       playerPos.y + 200,
       512,
       0xffa500,
-      1.5,
-      23,
+      1,
+      40,
     );
     // fixedLight.setVisible(false);
     const tween2 = this.tweens.add({
@@ -148,16 +148,18 @@ export class Game extends Scene {
 
     // Vignette
     this.vignette = this.add.image(0, 0, 'vignette');
-    this.vignette.setScale(720 / 800);
+    this.vignette.setScale(1.1);
+    this.vignette.setAlpha(0.9);
     this.vignette.depth = 1000000;
-    this.vignette.setAlpha(0.4);
-    this.vignette.enableFilters();
-    this.vignette.filters?.internal.addBlur(2, 2, 2, 3.75);
 
     // Scene PostEffects.
-    // this.camera.filters.internal.addColorMatrix().colorMatrix.lsd();
+    this.camera.filters.internal
+      .addColorMatrix()
+      .colorMatrix.saturate(-0.3)
+      .hue(20)
+      .brightness(1, true);
 
-    // this.camera.filters.internal.addTiltShift(0.9, 2, 0.4, 0.4, 0.4, 0.5);
+    this.camera.filters.internal.addTiltShift(0.35, 2, 0, 0.4, 0.4, 0.9);
 
     // So much better in low light!!!
     // this.camera.filters.internal.addThreshold(0.05, 0.5);

@@ -7,8 +7,8 @@ const WALK_SPEED = 1;
 const DIAGONAL_SCALE = 1.0 / Math.SQRT2;
 const SENSOR_WIDTH = 2;
 const SPRITE_Y_ADJUST = 3;
-const SHADOW_SCALE_BASE_RADIUS = 128;
-const SHADOW_ALPHA_MAX = 0.8;
+const SHADOW_SCALE_BASE_RADIUS = 64;
+const SHADOW_ALPHA_MAX = 0.9;
 const SHADOW_FALLLOFF_RATE = 1.4;
 
 let USE_BITMAP_MASK = !isSafari() && false;
@@ -535,7 +535,7 @@ export class Character {
 
       if (shadowSprite == null) {
         shadowSprite = this.scene.add
-          .sprite(0, SPRITE_Y_ADJUST + 5 /** TODO: WHY?? **/, this.key, 0)
+          .sprite(0, SPRITE_Y_ADJUST + 5, this.key, 0)
           .setOrigin(0.5, 1)
           .setTint(0x000000)
           .setLighting(true);
@@ -554,10 +554,7 @@ export class Character {
       shadowSprite.setRotation(angle);
 
       // Set the length of shadow based on distance.
-      const yScale = Math.max(
-        ((dist / l.radius) * 2 * l.radius) / SHADOW_SCALE_BASE_RADIUS,
-        1,
-      );
+      const yScale = Math.max(dist / SHADOW_SCALE_BASE_RADIUS, 1);
       shadowSprite.setScale(1, yScale);
 
       // Set the strength based on distance

@@ -41,6 +41,11 @@ export class Preloader extends Scene {
     this.load.spritesheet(
       'tree_objects',
       'tilesets/forest/gentle trees 80x96 v01.png',
+      /*
+      [
+        'tilesets/forest/gentle trees 80x96 v01.png',
+        'tilesets/forest/gentle trees 80x96 v01_n.png',
+      ] as any,*/
       {
         frameWidth: 80,
         frameHeight: 96,
