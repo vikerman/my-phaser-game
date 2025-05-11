@@ -8,7 +8,7 @@ const DIAGONAL_SCALE = 1.0 / Math.SQRT2;
 const SENSOR_WIDTH = 2;
 const SPRITE_Y_ADJUST = 3;
 const SHADOW_SCALE_BASE_RADIUS = 64;
-const SHADOW_ALPHA_MAX = 0.9;
+const SHADOW_ALPHA_MAX = 0.8;
 const SHADOW_FALLLOFF_RATE = 1.4;
 
 let USE_BITMAP_MASK = !isSafari() && false;

@@ -51,7 +51,7 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
             this.texture,
             0,
           )
-          .setOrigin(0.5, 0.95)
+          .setOrigin(0.5, 1)
           .setTint(0x000000)
           .setLighting(true);
         shadowSprite.depth = this.depth - 0.1;
@@ -69,7 +69,7 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
       // Set the length of shadow based on distance.
       let yScale = dist / SHADOW_SCALE_BASE_RADIUS;
       if (this.displayHeight > DISPLAY_HEIGHT_THRESHOLD) {
-        yScale = (l.radius - dist) / this.displayHeight;
+        yScale = Math.min((l.radius - dist) / this.displayHeight, 3);
       }
       shadowSprite.setScale(1, Math.max(yScale, MIN_Y_SCALE));
 
