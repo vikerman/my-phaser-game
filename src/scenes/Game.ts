@@ -1,6 +1,16 @@
 import { Scene } from 'phaser';
 import { Character } from '../objects/character';
 import { createObjectsFromLayer } from '../utils/objectLayer';
+import {
+  CurrentTimeOfDay,
+  setCurrentTimeOfDay,
+  TimesOfDay,
+} from '../objects/time';
+
+export type SoundType =
+  | Phaser.Sound.NoAudioSound
+  | Phaser.Sound.HTML5AudioSound
+  | Phaser.Sound.WebAudioSound;
 
 export class Game extends Scene {
   camera: Phaser.Cameras.Scene2D.Camera;
@@ -8,20 +18,72 @@ export class Game extends Scene {
   msg_text: Phaser.GameObjects.Text;
   player: Character;
   playerLight: Phaser.GameObjects.Light;
-  waterfall:
-    | Phaser.Sound.NoAudioSound
-    | Phaser.Sound.HTML5AudioSound
-    | Phaser.Sound.WebAudioSound;
+  fixedLight: Phaser.GameObjects.Light;
+  waterfall: SoundType;
+  fireSound: SoundType;
+  nightSound: SoundType;
   waterfallPos: Phaser.Math.Vector2;
   sprites: Phaser.GameObjects.Sprite[];
   vignette: Phaser.GameObjects.Image;
+  colorMatrix: Phaser.Display.ColorMatrix;
+  threshold?: Phaser.Filters.Threshold;
 
   constructor() {
     super('Game');
   }
 
+  private toggleTimeOfDay() {
+    if (CurrentTimeOfDay == TimesOfDay.DAY) {
+      setCurrentTimeOfDay(TimesOfDay.NIGHT);
+    } else {
+      setCurrentTimeOfDay(TimesOfDay.DAY);
+    }
+
+    if (CurrentTimeOfDay == TimesOfDay.DAY) {
+      // Lighting
+      // Sunset
+      // 0xfff474
+      // 0xfd5e53
+      // 0x3c3b5f
+      // 0x191c5c
+      // Moonlight
+      // 0x04084f
+      // Bright
+      // 0xaaaaaa
+      this.lights.setAmbientColor(0xaaaaaa);
+      this.playerLight.setVisible(false);
+      this.fixedLight.setVisible(false);
+
+      this.fireSound.pause();
+      this.nightSound.pause();
+
+      this.colorMatrix.reset().hue(20).saturate(-0.3).brightness(1, true);
+
+      if (this.threshold != null) {
+        this.threshold.destroy();
+      }
+      this.threshold = this.camera.filters.internal.addThreshold(0.05, 0.9);
+    } else if (CurrentTimeOfDay == TimesOfDay.NIGHT) {
+      this.lights.setAmbientColor(0x191c5c);
+      this.playerLight.setVisible(true);
+      this.fixedLight.setVisible(true);
+
+      this.fireSound.play();
+      this.nightSound.play();
+
+      this.colorMatrix.reset().hue(20).saturate(-0.3).brightness(1.3, true);
+
+      // So much better in low light!!!
+      if (this.threshold != null) {
+        this.threshold.destroy();
+      }
+      this.threshold = this.camera.filters.internal.addThreshold(0.05, 0.5);
+    }
+  }
+
   create() {
     this.camera = this.cameras.main;
+    this.lights.enable();
 
     // Load the TileMap. By convention the key for the tileset image is same as the tileset name.
     const map = this.make.tilemap({ key: 'map' });
@@ -57,7 +119,7 @@ export class Game extends Scene {
     // Load the character sprite.
     this.player = new Character(this, 'king', {
       mainPlayer: true,
-      x: 1000,
+      x: 800,
       y: 100,
     });
 
@@ -65,29 +127,15 @@ export class Game extends Scene {
     this.camera.setBounds(0, 0, map.widthInPixels, map.heightInPixels);
     this.camera.startFollow(this.player.mainObject(), true /* roundPixels */);
 
-    // Lighting
-    // Sunset
-    // 0xfff474
-    // 0xfd5e53
-    // 0x3c3b5f
-    // 0x191c5c
-    // Moonlight
-    // 0x04084f
-    // Bright
-    // 0xcccccc
-    this.lights.enable().setAmbientColor(0x191c5c);
-
     const playerPos = this.player.getPosition();
     this.playerLight = this.lights.addLight(
       playerPos.x - 8,
-      playerPos.y + 8,
+      playerPos.y + 4,
       144,
       0xffa500,
-      0.5,
+      1,
       64,
     );
-    // this.playerLight.setVisible(false);
-
     const tween = this.tweens.add({
       targets: this.playerLight,
       ease: 'Bounce',
@@ -101,17 +149,16 @@ export class Game extends Scene {
     });
 
     // Add a fixed light.
-    const fixedLight = this.lights.addLight(
-      playerPos.x - 200,
+    this.fixedLight = this.lights.addLight(
+      playerPos.x,
       playerPos.y + 200,
       512,
       0xffa500,
       0.7,
       100,
     );
-    // fixedLight.setVisible(false);
     const tween2 = this.tweens.add({
-      targets: fixedLight,
+      targets: this.fixedLight,
       ease: 'Bounce',
       intensity: 0.5,
       yoyo: true,
@@ -125,18 +172,16 @@ export class Game extends Scene {
     // Sounds
 
     // Fire idle sound
-    const fireSound = this.sound.add('fire-idle', {
+    this.fireSound = this.sound.add('fire-idle', {
       loop: true,
       volume: 0.1,
     });
-    fireSound.play();
 
     // Ambient night sound
-    const nightSound = this.sound.add('night', {
+    this.nightSound = this.sound.add('night', {
       loop: true,
       volume: 0.1,
     });
-    nightSound.play();
 
     // Waterfall sound
     this.waterfall = this.sound.add('waterfall', {
@@ -148,12 +193,12 @@ export class Game extends Scene {
 
     // Vignette
     this.vignette = this.add.image(0, 0, 'vignette');
-    this.vignette.setScale(1.05);
+    this.vignette.setScale((1024 / 640) * 1.05);
     this.vignette.setAlpha(0.85);
     this.vignette.depth = 1000000;
 
     // Scene PostEffects.
-    this.camera.filters.internal
+    this.colorMatrix = this.camera.filters.internal
       .addColorMatrix()
       .colorMatrix.hue(20)
       .saturate(-0.3)
@@ -161,17 +206,20 @@ export class Game extends Scene {
 
     this.camera.filters.internal.addTiltShift(0.6, 2, 0, 0, 0.4, 0.9);
 
-    // So much better in low light!!!
-    this.camera.filters.internal.addThreshold(0.05, 0.5);
+    // Toggle the time of day.
+    this.toggleTimeOfDay();
 
-    // Daytime
-    // this.camera.filters.internal.addThreshold(0.05, 0.9);
+    // Setup key for daytime toggle.
+    const tKey = this.input.keyboard?.addKey('T');
+    tKey?.on('down', () => {
+      this.toggleTimeOfDay();
+    });
   }
 
   override update() {
     const playerPos = this.player.getPosition();
     this.playerLight.x = playerPos.x - 8;
-    this.playerLight.y = playerPos.y + 8;
+    this.playerLight.y = playerPos.y + 4;
 
     const dist = this.waterfallPos.distance(this.player.getPosition());
     if (dist != 0) {

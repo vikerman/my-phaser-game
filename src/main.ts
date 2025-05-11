@@ -13,8 +13,9 @@ import { Game, Types } from 'phaser';
 const config: Types.Core.GameConfig = {
   type: Phaser.WEBGL,
   width: 640,
-  height: 480,
-  roundPixels: true,
+  height: 360,
+  autoRound: true,
+  antialiasGL: false,
   parent: 'game-container',
   scale: {
     mode: Phaser.Scale.ENVELOP,

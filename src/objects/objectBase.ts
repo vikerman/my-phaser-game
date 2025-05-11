@@ -30,7 +30,6 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
       const dist = objPos.length();
       let dir = objPos.normalize();
       let shadowSprite = this.shadowSprites.get(l);
-
       if (!l.visible || dist > l.radius) {
         if (shadowSprite != null) {
           this.shadowSprites.delete(l);
@@ -48,8 +47,7 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
             0,
           )
           .setOrigin(0.5, 0.97)
-          .setTint(0x000000)
-          .setLighting(true);
+          .setTint(0x000000);
         shadowSprite.depth = this.depth - 0.1;
         this.shadowSprites.set(l, shadowSprite);
       }
@@ -59,6 +57,16 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
 
       // Set the frame
       shadowSprite.frame = this.frame;
+    }
+    // Remove lights that are no longer visible.
+    for (const l of this.shadowSprites.keys()) {
+      if (!l.visible) {
+        const shadowSprite = this.shadowSprites.get(l);
+        if (shadowSprite != null) {
+          shadowSprite.destroy();
+        }
+        this.shadowSprites.delete(l);
+      }
     }
   }
 }
