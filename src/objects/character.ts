@@ -1,3 +1,4 @@
+import { setShadowParams } from '../utils/shadowCalc';
 import { isSafari } from '../utils/useragent';
 
 /**
@@ -7,9 +8,6 @@ const WALK_SPEED = 1;
 const DIAGONAL_SCALE = 1.0 / Math.SQRT2;
 const SENSOR_WIDTH = 2;
 const SPRITE_Y_ADJUST = 3;
-const SHADOW_SCALE_BASE_RADIUS = 64;
-const SHADOW_ALPHA_MAX = 0.8;
-const SHADOW_FALLLOFF_RATE = 1.4;
 
 let USE_BITMAP_MASK = !isSafari() && false;
 
@@ -545,32 +543,8 @@ export class Character {
           .moveBelow(shadowSprite, this.sprite);
       }
 
-      // Set the Angle based on direction from light.
-      // toFixed returns and string. The + converts it back to number.
-      let angle = +Math.acos(-dir.y).toFixed(3);
-      if (dir.x < 0) {
-        angle = -angle;
-      }
-      shadowSprite.setRotation(angle);
-
-      // Set the length of shadow based on distance.
-      const yScale = Math.max(dist / SHADOW_SCALE_BASE_RADIUS, 1);
-      shadowSprite.setScale(1, yScale);
-
-      // Set the strength based on distance
-      const alpha1 =
-        (Math.max(SHADOW_ALPHA_MAX - dist / l.radius, 0) * l.intensity) / 2;
-      let alpha2 =
-        (Math.max(
-          SHADOW_ALPHA_MAX -
-            (dist + shadowSprite.displayHeight * SHADOW_FALLLOFF_RATE) /
-              l.radius,
-          0,
-        ) *
-          l.intensity) /
-        2;
-      // alpha2 *= Math.sqrt(alpha2);
-      shadowSprite.setAlpha(alpha2, alpha2, alpha1, alpha1);
+      // Use the utility function shared with all objects casting a shadow.
+      setShadowParams(l, shadowSprite, dir, dist);
 
       // Set the frame
       shadowSprite.frame = this.sprite.frame;

@@ -1,8 +1,4 @@
-const SHADOW_SCALE_BASE_RADIUS = 64;
-const SHADOW_ALPHA_MAX = 0.9;
-const SHADOW_FALLLOFF_RATE = 1.4;
-const MIN_Y_SCALE = 1.5;
-const DISPLAY_HEIGHT_THRESHOLD = 32;
+import { setShadowParams } from '../utils/shadowCalc';
 
 export class ObjectBase extends Phaser.GameObjects.Sprite {
   private readonly shadowSprites = new Map<
@@ -51,41 +47,15 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
             this.texture,
             0,
           )
-          .setOrigin(0.5, 1)
+          .setOrigin(0.5, 0.97)
           .setTint(0x000000)
           .setLighting(true);
         shadowSprite.depth = this.depth - 0.1;
         this.shadowSprites.set(l, shadowSprite);
       }
 
-      // Set the Angle based on direction from light.
-      // toFixed returns and string. The + converts it back to number.
-      let angle = +Math.acos(-dir.y).toFixed(3);
-      if (dir.x < 0) {
-        angle = -angle;
-      }
-      shadowSprite.setRotation(angle);
-
-      // Set the length of shadow based on distance.
-      let yScale = dist / SHADOW_SCALE_BASE_RADIUS;
-      if (this.displayHeight > DISPLAY_HEIGHT_THRESHOLD) {
-        yScale = Math.min((l.radius - dist) / this.displayHeight, 3);
-      }
-      shadowSprite.setScale(1, Math.max(yScale, MIN_Y_SCALE));
-
-      // Set the strength based on distance
-      const alpha1 =
-        (Math.max(SHADOW_ALPHA_MAX - dist / l.radius, 0) * l.intensity) / 2;
-      let alpha2 =
-        (Math.max(
-          SHADOW_ALPHA_MAX -
-            (dist + shadowSprite.displayHeight * SHADOW_FALLLOFF_RATE) /
-              l.radius,
-          0,
-        ) *
-          l.intensity) /
-        2;
-      shadowSprite.setAlpha(alpha2, alpha2, alpha1, alpha1);
+      // Use the utility function shared with all objects casting a shadow.
+      setShadowParams(l, shadowSprite, dir, dist);
 
       // Set the frame
       shadowSprite.frame = this.frame;

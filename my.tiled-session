@@ -3,12 +3,12 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "public/assets/maps/forest.tmj",
+    "activeFile": "",
     "expandedProjectPaths": [
-        "public/assets",
         "public/assets/maps",
-        ".",
-        "public"
+        "public/assets",
+        "public",
+        "."
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -24,7 +24,7 @@
             "scale": 1.175625,
             "selectedLayer": 0,
             "viewCenter": {
-                "x": 684.7421584263691,
+                "x": 685.1674641148327,
                 "y": 440.1913875598086
             }
         },
@@ -39,8 +39,15 @@
             "scaleInDock": 1,
             "scaleInEditor": 1
         },
+        "public/assets/maps/forest.tmj#objects": {
+            "scaleInDock": 1,
+            "scaleInEditor": 1
+        },
         "public/assets/maps/forest.tmj#objects1": {
             "scaleInEditor": 5.5
+        },
+        "public/assets/maps/forest.tmj#tree_objects": {
+            "scaleInDock": 1
         },
         "public/assets/maps/forest.tmj#trees": {
             "scaleInEditor": 1
@@ -52,7 +59,7 @@
         "public/assets/maps/forest.tmj"
     ],
     "project": "my.tiled-project",
-    "property.type": "int",
+    "property.type": "object",
     "recentFiles": [
         "public/assets/maps/forest.tmj",
         "/home/vikram/Downloads/20.04c - Summer Forest 4.2/TSX files/summer water sparkles.tsx"

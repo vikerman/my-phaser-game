@@ -79,12 +79,12 @@ export class Game extends Scene {
 
     const playerPos = this.player.getPosition();
     this.playerLight = this.lights.addLight(
-      playerPos.x + 4,
+      playerPos.x - 8,
       playerPos.y + 8,
-      512,
+      144,
       0xffa500,
-      1,
-      23,
+      0.5,
+      64,
     );
     // this.playerLight.setVisible(false);
 
@@ -170,7 +170,7 @@ export class Game extends Scene {
 
   override update() {
     const playerPos = this.player.getPosition();
-    this.playerLight.x = playerPos.x + 4;
+    this.playerLight.x = playerPos.x - 8;
     this.playerLight.y = playerPos.y + 8;
 
     const dist = this.waterfallPos.distance(this.player.getPosition());
