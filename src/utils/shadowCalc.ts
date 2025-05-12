@@ -1,8 +1,9 @@
 const SHADOW_SCALE_BASE_RADIUS = 64;
-const SHADOW_ALPHA_MAX = 0.85;
+const SHADOW_ALPHA_MAX = 0.9;
 const SHADOW_FALLLOFF_RATE = 1.4;
 const MIN_Y_SCALE = 1;
 const X_SCALE = 0.75;
+const ANGLE_DIFF_THRESHOLD = 0.01;
 const DISPLAY_HEIGHT_THRESHOLD = 32;
 
 /**
@@ -23,7 +24,7 @@ export function setShadowParams(
   if (dir.x < 0) {
     angle = -angle;
   }
-  if (Math.abs(shadowSprite.angle - angle) > 0.01) {
+  if (Math.abs(shadowSprite.angle - angle) > ANGLE_DIFF_THRESHOLD) {
     shadowSprite.setRotation(angle);
   }
 

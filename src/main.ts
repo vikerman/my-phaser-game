@@ -14,8 +14,6 @@ const config: Types.Core.GameConfig = {
   type: Phaser.WEBGL,
   width: 640,
   height: 360,
-  autoRound: true,
-  antialiasGL: false,
   parent: 'game-container',
   scale: {
     mode: Phaser.Scale.ENVELOP,
@@ -30,6 +28,7 @@ const config: Types.Core.GameConfig = {
       gravity: { x: 0, y: 0 },
     },
   },
+  desynchronized: true,
   scene: [Boot, Preloader, Glow, Glow2, /* MainMenu, */ MainGame, GameOver],
 };
 window.devicePixelRatio = 1;
