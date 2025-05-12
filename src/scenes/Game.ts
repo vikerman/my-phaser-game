@@ -17,7 +17,6 @@ export class Game extends Scene {
   background: Phaser.GameObjects.Image;
   msg_text: Phaser.GameObjects.Text;
   player: Character;
-  playerLight: Phaser.GameObjects.Light;
   fixedLight: Phaser.GameObjects.Light;
   waterfall: SoundType;
   fireSound: SoundType;
@@ -51,7 +50,6 @@ export class Game extends Scene {
       // Bright
       // 0xaaaaaa
       this.lights.setAmbientColor(0xaaaaaa);
-      this.playerLight.setVisible(false);
       this.fixedLight.setVisible(false);
 
       this.fireSound.pause();
@@ -65,7 +63,6 @@ export class Game extends Scene {
       this.threshold = this.camera.filters.internal.addThreshold(0.05, 0.9);
     } else if (CurrentTimeOfDay == TimesOfDay.NIGHT) {
       this.lights.setAmbientColor(0x191c5c);
-      this.playerLight.setVisible(true);
       this.fixedLight.setVisible(true);
 
       this.fireSound.play();
@@ -128,25 +125,6 @@ export class Game extends Scene {
     this.camera.startFollow(this.player.mainObject(), true /* roundPixels */);
 
     const playerPos = this.player.getPosition();
-    this.playerLight = this.lights.addLight(
-      playerPos.x - 8,
-      playerPos.y + 16,
-      144,
-      0xffa500,
-      1,
-      64,
-    );
-    const tween = this.tweens.add({
-      targets: this.playerLight,
-      ease: 'Bounce',
-      intensity: 0.5,
-      yoyo: true,
-      repeat: -1,
-      duration: 1000,
-      onRepeat: () => {
-        tween.duration = 100 + Math.random() * 900;
-      },
-    });
 
     // Add a fixed light.
     this.fixedLight = this.lights.addLight(
@@ -218,9 +196,6 @@ export class Game extends Scene {
 
   override update() {
     const playerPos = this.player.getPosition();
-    this.playerLight.x = playerPos.x - 8;
-    this.playerLight.y = playerPos.y + 16;
-
     const dist = this.waterfallPos.distance(this.player.getPosition());
     if (dist != 0) {
       let vol = Math.max(0, Math.min(1, 50 / dist));

@@ -1,5 +1,6 @@
 import { setShadowParams } from '../utils/shadowCalc';
 import { isSafari } from '../utils/useragent';
+import { CurrentTimeOfDay, TimesOfDay } from './time';
 
 /**
  * A Character class to hold everything related to a character.
@@ -41,6 +42,7 @@ export class Character {
     Phaser.GameObjects.Sprite
   >();
   private readonly sprite: Phaser.GameObjects.Sprite;
+  private playerLight: Phaser.GameObjects.Light;
   private readonly key: string;
   private cursor: Phaser.Types.Input.Keyboard.CursorKeys | undefined =
     undefined;
@@ -215,7 +217,28 @@ export class Character {
       this.onSensorCollideEnd(pair, 's');
     };
 
-    scene.events.on('update', () => {
+    // Add a player Light
+    this.playerLight = scene.lights.addLight(
+      this.sprite.getWorldPoint().x - 8,
+      this.sprite.getWorldPoint().y + 16,
+      144,
+      0xffa500,
+      1,
+      64,
+    );
+    const tween = scene.tweens.add({
+      targets: this.playerLight,
+      ease: 'Bounce',
+      intensity: 0.5,
+      yoyo: true,
+      repeat: -1,
+      duration: 1000,
+      onRepeat: () => {
+        tween.duration = 100 + Math.random() * 900;
+      },
+    });
+
+    scene.events.on('postupdate', () => {
       this.update();
     });
   }
@@ -506,6 +529,15 @@ export class Character {
         // We will have only one instance of the shadow sprite.
         break;
       }
+    }
+
+    this.playerLight.x = worldPos.x - 8;
+    this.playerLight.y = worldPos.y + 16;
+    if (CurrentTimeOfDay == TimesOfDay.DAY && this.playerLight.visible) {
+      this.playerLight.setVisible(false);
+    }
+    if (CurrentTimeOfDay == TimesOfDay.NIGHT && !this.playerLight.visible) {
+      this.playerLight.setVisible(true);
     }
 
     // Create shadow for each light in the scene - if within the light radius.
