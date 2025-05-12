@@ -171,8 +171,8 @@ export class Game extends Scene {
 
     // Vignette
     this.vignette = this.add.image(0, 0, 'vignette');
-    this.vignette.setScale((1024 / 640) * 1.05);
-    this.vignette.setAlpha(0.85);
+    this.vignette.setScale(1);
+    this.vignette.setAlpha(1);
     this.vignette.depth = 1000000;
 
     // Scene PostEffects.
