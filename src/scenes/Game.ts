@@ -55,7 +55,7 @@ export class Game extends Scene {
       this.fireSound.pause();
       this.nightSound.pause();
 
-      this.colorMatrix.reset().hue(20).saturate(-0.3).brightness(1, true);
+      this.colorMatrix.reset().hue(20).saturate(-0.3).brightness(1.2, true);
 
       if (this.threshold != null) {
         this.threshold.destroy();
@@ -171,7 +171,7 @@ export class Game extends Scene {
 
     // Vignette
     this.vignette = this.add.image(0, 0, 'vignette');
-    this.vignette.setScale(1);
+    this.vignette.setScale(1.01);
     this.vignette.setAlpha(1);
     this.vignette.depth = 1000000;
 
@@ -192,11 +192,15 @@ export class Game extends Scene {
     tKey?.on('down', () => {
       this.toggleTimeOfDay();
     });
+
+    this.events.on('postupdate', () => {
+      this.postUpdate();
+    });
   }
 
-  override update() {
+  postUpdate() {
     const playerPos = this.player.getPosition();
-    const dist = this.waterfallPos.distance(this.player.getPosition());
+    const dist = this.waterfallPos.distance(playerPos);
     if (dist != 0) {
       let vol = Math.max(0, Math.min(1, 50 / dist));
       this.waterfall.setVolume(vol);

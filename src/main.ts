@@ -16,7 +16,7 @@ const config: Types.Core.GameConfig = {
   height: 360,
   parent: 'game-container',
   scale: {
-    mode: Phaser.Scale.ENVELOP,
+    mode: Phaser.Scale.WIDTH_CONTROLS_HEIGHT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
   pixelArt: true,
