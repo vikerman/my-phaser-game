@@ -59,6 +59,7 @@ export class Character {
   private south = 0;
 
   public isMainPlayer;
+  lastTimeOfDay: string;
 
   // Methods
   constructor(
@@ -229,13 +230,17 @@ export class Character {
     const tween = scene.tweens.add({
       targets: this.playerLight,
       ease: 'Bounce',
-      intensity: 0.5,
+      intensity: 0.1,
       yoyo: true,
       repeat: -1,
       duration: 1000,
       onRepeat: () => {
         tween.duration = 100 + Math.random() * 900;
       },
+    });
+    const keyObject = scene.input.keyboard?.addKey('l');
+    keyObject?.on('down', () => {
+      this.playerLight.setVisible(!this.playerLight.visible);
     });
 
     scene.events.on('postupdate', () => {
@@ -533,12 +538,15 @@ export class Character {
 
     this.playerLight.x = worldPos.x - 8;
     this.playerLight.y = worldPos.y + 16;
-    if (CurrentTimeOfDay == TimesOfDay.DAY && this.playerLight.visible) {
-      this.playerLight.setVisible(false);
+    if (this.lastTimeOfDay != CurrentTimeOfDay) {
+      if (CurrentTimeOfDay == TimesOfDay.DAY) {
+        this.playerLight.setVisible(false);
+      }
+      if (CurrentTimeOfDay == TimesOfDay.NIGHT) {
+        this.playerLight.setVisible(true);
+      }
     }
-    if (CurrentTimeOfDay == TimesOfDay.NIGHT && !this.playerLight.visible) {
-      this.playerLight.setVisible(true);
-    }
+    this.lastTimeOfDay = CurrentTimeOfDay;
 
     // Create shadow for each light in the scene - if within the light radius.
     for (const light of this.scene.lights.getLights(

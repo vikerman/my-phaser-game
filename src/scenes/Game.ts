@@ -51,7 +51,7 @@ export class Game extends Scene {
       this.fireSound.pause();
       this.nightSound.pause();
 
-      this.colorMatrix.reset().hue(20).saturate(-0.3).brightness(1.2, true);
+      this.colorMatrix.reset().hue(40).saturate(-0.4).brightness(1.2, true);
 
       if (this.threshold != null) {
         this.threshold.destroy();
@@ -64,7 +64,7 @@ export class Game extends Scene {
       this.fireSound.play();
       this.nightSound.play();
 
-      this.colorMatrix.reset().hue(20).saturate(-0.3).brightness(1.3, true);
+      this.colorMatrix.reset().hue(40).saturate(-0.4).brightness(1.3, true);
 
       // So much better in low light!!!
       if (this.threshold != null) {
@@ -124,21 +124,50 @@ export class Game extends Scene {
     const playerPos = this.player.getPosition();
 
     // Add a fixed light.
+    const fixedPos = { x: playerPos.x, y: playerPos.y + 200 };
+    const color = 0x009cb1;
+    const minBloom = 0.3;
+    const maxBloom = 1;
+    const circle = this.add.circle(fixedPos.x, fixedPos.y, 5, color);
+    circle.enableFilters();
+    const parallelFilters = circle.filters?.internal.addParallelFilters()!;
+    parallelFilters.top.addThreshold(0.1, 0.8);
+    parallelFilters.top.addBlur(1);
+    parallelFilters.blend.blendMode = Phaser.BlendModes.ADD;
+    parallelFilters.blend.amount = minBloom;
+
+    this.add.tween({
+      targets: circle,
+      ease: 'sine',
+      y: fixedPos.y + 5,
+      yoyo: true,
+      repeat: -1,
+      duration: 1200,
+    });
+
     this.fixedLight = this.lights.addLight(
       playerPos.x,
       playerPos.y + 200,
-      512,
-      0xffa500,
-      0.7,
+      200,
+      color,
+      1,
       100,
     );
     const tween2 = this.tweens.add({
       targets: this.fixedLight,
       ease: 'Bounce',
-      intensity: 0.5,
+      intensity: 0.1,
       yoyo: true,
       repeat: -1,
       duration: 1200,
+      onUpdate: (_: Phaser.Tweens.Tween, __: any, key: string) => {
+        if (key == 'intensity') {
+          // Adjust light brightness based on this intentsity.
+          parallelFilters.blend.amount =
+            minBloom +
+            ((this.fixedLight.intensity - 0.1) / 1.4) * (maxBloom - minBloom);
+        }
+      },
       onRepeat: () => {
         tween2.duration = 100 + Math.random() * 900;
       },
