@@ -12,7 +12,7 @@ const DISPLAY_HEIGHT_THRESHOLD = 32;
  * `dir` and `dist` are precalculated direction and distance vectore of the
  * sprite from the light.
  */
-export function setShadowParams(
+export function setNightShadowParams(
   l: Phaser.GameObjects.Light,
   shadowSprite: Phaser.GameObjects.Sprite,
   dir: Phaser.Math.Vector2,

@@ -1,4 +1,4 @@
-import { setShadowParams } from '../utils/shadowCalc';
+import { setNightShadowParams } from '../utils/shadowCalc';
 import { isSafari } from '../utils/useragent';
 import { CurrentTimeOfDay, TimesOfDay } from './time';
 
@@ -575,7 +575,7 @@ export class Character {
       }
 
       // Use the utility function shared with all objects casting a shadow.
-      setShadowParams(l, shadowSprite, dir, dist);
+      setNightShadowParams(l, shadowSprite, dir, dist);
 
       // Set the frame
       shadowSprite.frame = this.sprite.frame;

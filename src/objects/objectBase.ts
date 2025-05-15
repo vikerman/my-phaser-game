@@ -1,4 +1,4 @@
-import { setShadowParams } from '../utils/shadowCalc';
+import { setNightShadowParams } from '../utils/shadowCalc';
 
 export class ObjectBase extends Phaser.GameObjects.Sprite {
   private readonly shadowSprites = new Map<
@@ -53,7 +53,7 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
       }
 
       // Use the utility function shared with all objects casting a shadow.
-      setShadowParams(l, shadowSprite, dir, dist);
+      setNightShadowParams(l, shadowSprite, dir, dist);
 
       // Set the frame
       shadowSprite.frame = this.frame;
