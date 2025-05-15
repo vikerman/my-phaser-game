@@ -12,8 +12,8 @@ import { Game, Types } from 'phaser';
 //  https://newdocs.phaser.io/docs/3.70.0/Phaser.Types.Core.GameConfig
 const config: Types.Core.GameConfig = {
   type: Phaser.WEBGL,
-  width: 640,
-  height: 360,
+  width: 1280,
+  height: 800,
   parent: 'game-container',
   scale: {
     mode: Phaser.Scale.WIDTH_CONTROLS_HEIGHT,

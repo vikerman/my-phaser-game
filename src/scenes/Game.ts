@@ -76,6 +76,7 @@ export class Game extends Scene {
 
   create() {
     this.camera = this.cameras.main;
+    this.camera.setZoom(2);
     this.lights.enable();
 
     // Load the TileMap. By convention the key for the tileset image is same as the tileset name.
@@ -167,7 +168,7 @@ export class Game extends Scene {
 
     // Vignette
     this.vignette = this.add.image(0, 0, 'vignette');
-    this.vignette.setScale(1.01);
+    this.vignette.setScale((1.01 * this.sys.canvas.width) / 640);
     this.vignette.setAlpha(1);
     this.vignette.depth = 1000000;
 
