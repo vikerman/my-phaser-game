@@ -2,7 +2,9 @@ import { Scene } from 'phaser';
 import { Character } from '../objects/character';
 import { createObjectsFromLayer } from '../utils/objectLayer';
 import {
+  CurrentDate,
   CurrentTimeOfDay,
+  setCurrentDate,
   setCurrentTimeOfDay,
   TimesOfDay,
 } from '../objects/time';
@@ -31,13 +33,7 @@ export class Game extends Scene {
     super('Game');
   }
 
-  private toggleTimeOfDay() {
-    if (CurrentTimeOfDay == TimesOfDay.DAY) {
-      setCurrentTimeOfDay(TimesOfDay.NIGHT);
-    } else {
-      setCurrentTimeOfDay(TimesOfDay.DAY);
-    }
-
+  private adjustToTimeOfDay() {
     if (CurrentTimeOfDay == TimesOfDay.DAY) {
       // Lighting
       // Sunset
@@ -184,13 +180,27 @@ export class Game extends Scene {
 
     this.camera.filters.internal.addTiltShift(0.6, 2, 0, 0, 0.4, 0.9);
 
-    // Toggle the time of day.
-    this.toggleTimeOfDay();
+    // Set the time of day to match local time.
+    setCurrentDate(new Date());
+    this.adjustToTimeOfDay();
 
     // Setup key for daytime toggle.
     const tKey = this.input.keyboard?.addKey('T');
     tKey?.on('down', () => {
-      this.toggleTimeOfDay();
+      if (CurrentTimeOfDay == TimesOfDay.DAY) {
+        setCurrentTimeOfDay(TimesOfDay.NIGHT);
+      } else {
+        setCurrentTimeOfDay(TimesOfDay.DAY);
+      }
+      this.adjustToTimeOfDay();
+    });
+
+    const hKey = this.input.keyboard?.addKey('H');
+    hKey?.on('down', () => {
+      const date = CurrentDate;
+      date.setHours(date.getHours() + 1);
+      setCurrentDate(date);
+      this.adjustToTimeOfDay();
     });
 
     this.events.on('postupdate', () => {
