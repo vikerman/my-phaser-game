@@ -127,7 +127,7 @@ export class Game extends Scene {
     const fixedPos = { x: playerPos.x, y: playerPos.y + 200 };
     const color = 0x009cb1;
     const minBloom = 0.3;
-    const maxBloom = 1;
+    const maxBloom = 1.5;
     const circle = this.add.circle(fixedPos.x, fixedPos.y, 5, color);
     circle.enableFilters();
     const parallelFilters = circle.filters?.internal.addParallelFilters()!;
@@ -138,7 +138,7 @@ export class Game extends Scene {
 
     this.add.tween({
       targets: circle,
-      ease: 'sine',
+      ease: 'Sine.easeInOut',
       y: fixedPos.y + 5,
       yoyo: true,
       repeat: -1,
@@ -155,7 +155,7 @@ export class Game extends Scene {
     );
     const tween2 = this.tweens.add({
       targets: this.fixedLight,
-      ease: 'Bounce',
+      ease: 'Sine.easeInOut',
       intensity: 0.1,
       yoyo: true,
       repeat: -1,
