@@ -51,7 +51,7 @@ export class Game extends Scene {
       this.fireSound.pause();
       this.nightSound.pause();
 
-      this.colorMatrix.reset().hue(40).saturate(-0.4).brightness(1.2, true);
+      this.colorMatrix.reset().saturate(-0.2).brightness(1.2, true);
 
       if (this.threshold != null) {
         this.threshold.destroy();
@@ -64,7 +64,7 @@ export class Game extends Scene {
       this.fireSound.play();
       this.nightSound.play();
 
-      this.colorMatrix.reset().hue(40).saturate(-0.4).brightness(1.3, true);
+      this.colorMatrix.reset().saturate(-0.4).brightness(0.9, true);
 
       // So much better in low light!!!
       if (this.threshold != null) {
