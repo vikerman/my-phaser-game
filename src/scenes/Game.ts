@@ -125,10 +125,35 @@ export class Game extends Scene {
 
     // Add a fixed light.
     const fixedPos = { x: playerPos.x, y: playerPos.y + 200 };
+    const lightHeight = 50;
     const color = 0x009cb1;
     const minBloom = 0.3;
     const maxBloom = 1.5;
     const circle = this.add.circle(fixedPos.x, fixedPos.y, 5, color);
+    circle.depth = circle.y + lightHeight;
+
+    // Shadow for the light orb
+    const lightShadow = this.add.image(
+      fixedPos.x,
+      fixedPos.y + lightHeight,
+      'shadow_sprite',
+    );
+    lightShadow.setAlpha(0.6);
+    lightShadow.scaleX = 1 / 3;
+    lightShadow.scaleY = 0.5 / 3;
+
+    this.add.tween({
+      targets: lightShadow,
+      ease: 'Sine.easeInOut',
+      scaleX: lightShadow.scaleX * 0.8,
+      scaleY: lightShadow.scaleY * 0.8,
+      alpha: lightShadow.alpha * 0.8,
+      yoyo: true,
+      repeat: -1,
+      duration: 1200,
+    });
+
+    // Blooom!!!
     circle.enableFilters();
     const parallelFilters = circle.filters?.internal.addParallelFilters()!;
     parallelFilters.top.addThreshold(0.1, 0.8);
@@ -148,7 +173,7 @@ export class Game extends Scene {
     this.fixedLight = this.lights.addLight(
       playerPos.x,
       playerPos.y + 200,
-      200,
+      256,
       color,
       1,
       100,
@@ -197,7 +222,9 @@ export class Game extends Scene {
 
     // Vignette
     this.vignette = this.add.image(0, 0, 'vignette');
-    this.vignette.setScale((1.01 * this.sys.canvas.width) / 640);
+    this.vignette.setScale(
+      (1.05 * this.sys.canvas.width) / (640 * this.camera.zoom),
+    );
     this.vignette.setAlpha(1);
     this.vignette.depth = 1000000;
 

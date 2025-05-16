@@ -575,7 +575,7 @@ export class Character {
         shadowSprite = this.scene.add
           .sprite(0, SPRITE_Y_ADJUST + 5, this.key, 0)
           .setOrigin(0.5, 1)
-          .setTint(0x000000);
+          .setTintFill(0x000000);
         this.shadowSprites.set(l, shadowSprite);
         (this.container as Phaser.GameObjects.Container)
           .add(shadowSprite)
