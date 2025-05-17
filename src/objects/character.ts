@@ -222,7 +222,7 @@ export class Character {
     this.playerLight = scene.lights.addLight(
       this.sprite.getWorldPoint().x - 8,
       this.sprite.getWorldPoint().y + 16,
-      144,
+      256,
       0xffa500,
       1,
       64,
@@ -575,6 +575,7 @@ export class Character {
         shadowSprite = this.scene.add
           .sprite(0, SPRITE_Y_ADJUST + 5, this.key, 0)
           .setOrigin(0.5, 1)
+          .setLighting(true)
           .setTintFill(0x000000);
         this.shadowSprites.set(l, shadowSprite);
         (this.container as Phaser.GameObjects.Container)

@@ -47,7 +47,8 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
             0,
           )
           .setOrigin(0.5, 0.97)
-          .setTint(0x000000);
+          .setLighting(true)
+          .setTintFill(0x000000);
         shadowSprite.depth = this.depth - 0.1;
         this.shadowSprites.set(l, shadowSprite);
       }

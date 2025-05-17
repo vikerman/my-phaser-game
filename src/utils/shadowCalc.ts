@@ -2,6 +2,7 @@ const SHADOW_SCALE_BASE_RADIUS = 64;
 const SHADOW_ALPHA_MAX = 0.9;
 const SHADOW_FALLLOFF_RATE = 1.4;
 const MIN_Y_SCALE = 1;
+const MAX_Y_SCALE = 5;
 const X_SCALE = 0.75;
 const ANGLE_DIFF_THRESHOLD = 0.01;
 const DISPLAY_HEIGHT_THRESHOLD = 32;
@@ -29,9 +30,9 @@ export function setNightShadowParams(
   }
 
   // Set the length of shadow based on distance.
-  let yScale = dist / SHADOW_SCALE_BASE_RADIUS;
+  let yScale = Math.min((dist * 2) / SHADOW_SCALE_BASE_RADIUS, MAX_Y_SCALE);
   if (shadowSprite.height > DISPLAY_HEIGHT_THRESHOLD) {
-    yScale = Math.min((l.radius - dist) / shadowSprite.height, 3);
+    yScale = Math.min((l.radius - dist) / shadowSprite.height, MAX_Y_SCALE);
   }
   shadowSprite.setScale(X_SCALE, Math.max(yScale, MIN_Y_SCALE));
 
