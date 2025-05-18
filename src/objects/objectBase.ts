@@ -1,6 +1,7 @@
-import { setNightShadowParams } from '../utils/shadowCalc';
+import { setNightShadowParams, setSunShadowParams } from '../utils/shadowCalc';
 
 export class ObjectBase extends Phaser.GameObjects.Sprite {
+  private sunShadow: Phaser.GameObjects.Sprite;
   private readonly shadowSprites = new Map<
     Phaser.GameObjects.Light,
     Phaser.GameObjects.Sprite
@@ -13,10 +14,29 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
   }
 
   override update() {
-    // Create and update shadow sprites.
-    // Create shadow for each light in the scene - if within the light radius.
     const worldPos = this.getWorldPoint();
 
+    // Create the shadow created by sun if not present.
+    if (this.sunShadow == null) {
+      this.sunShadow = this.scene.add
+        .sprite(
+          worldPos.x,
+          worldPos.y + this.displayHeight / 2 - 6,
+          this.texture,
+          0,
+        )
+        .setOrigin(0.5, 0.97)
+        .setLighting(true)
+        .setTintFill(0x000000);
+      this.sunShadow.depth = this.depth - 0.1;
+    }
+
+    // Update shadow created by sun.
+    setSunShadowParams(this.sunShadow);
+    this.sunShadow.frame = this.frame;
+
+    // Create and update shadow sprites.
+    // Create shadow for each light in the scene - if within the light radius.
     for (const light of this.scene.lights.getLights(
       this.scene.cameras.main,
     ) as never[]) {

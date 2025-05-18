@@ -12,11 +12,11 @@ export var CurrentTimeOfDay: TimeOfDay = 'DAY';
 
 export var CurrentDate = new Date();
 
-export function setCurrentTimeOfDay(time: TimeOfDay) {
+function setCurrentTimeOfDay(time: TimeOfDay) {
   CurrentTimeOfDay = time;
 }
 
-export function setCurrentDate(date: Date) {
+export function setCurrentTime(date: Date) {
   CurrentDate = date;
   const hours = date.getHours();
   if (hours >= 6 && hours <= 18) {

@@ -4,8 +4,7 @@ import { createObjectsFromLayer } from '../utils/objectLayer';
 import {
   CurrentDate,
   CurrentTimeOfDay,
-  setCurrentDate,
-  setCurrentTimeOfDay,
+  setCurrentTime,
   TimesOfDay,
 } from '../objects/time';
 
@@ -28,6 +27,7 @@ export class Game extends Scene {
   vignette: Phaser.GameObjects.Image;
   colorMatrix: Phaser.Display.ColorMatrix;
   threshold?: Phaser.Filters.Threshold;
+  hKey: Phaser.Input.Keyboard.Key;
 
   constructor() {
     super('Game');
@@ -46,7 +46,6 @@ export class Game extends Scene {
       // Bright
       // 0xaaaaaa
       this.lights.setAmbientColor(0xaaaaaa);
-      this.fixedLight.setVisible(false);
 
       this.fireSound.pause();
       this.nightSound.pause();
@@ -59,7 +58,6 @@ export class Game extends Scene {
       this.threshold = this.camera.filters.internal.addThreshold(0.05, 0.9);
     } else if (CurrentTimeOfDay == TimesOfDay.NIGHT) {
       this.lights.setAmbientColor(0x191c5c);
-      this.fixedLight.setVisible(true);
 
       this.fireSound.play();
       this.nightSound.play();
@@ -238,31 +236,29 @@ export class Game extends Scene {
     this.camera.filters.internal.addTiltShift(0.6, 2, 0, 0, 0.4, 0.9);
 
     // Set the time of day to match local time.
-    setCurrentDate(new Date());
+    setCurrentTime(new Date());
     this.adjustToTimeOfDay();
 
     // Setup key for daytime toggle.
     const tKey = this.input.keyboard?.addKey('T');
     tKey?.on('down', () => {
       if (CurrentTimeOfDay == TimesOfDay.DAY) {
-        setCurrentTimeOfDay(TimesOfDay.NIGHT);
+        const dt = new Date();
+        dt.setHours(23);
+        setCurrentTime(dt);
       } else {
-        setCurrentTimeOfDay(TimesOfDay.DAY);
+        const dt = new Date();
+        dt.setHours(8);
+        setCurrentTime(dt);
       }
-      this.adjustToTimeOfDay();
-    });
-
-    const hKey = this.input.keyboard?.addKey('H');
-    hKey?.on('down', () => {
-      const date = CurrentDate;
-      date.setHours(date.getHours() + 1);
-      setCurrentDate(date);
       this.adjustToTimeOfDay();
     });
 
     this.events.on('postupdate', () => {
       this.postUpdate();
     });
+
+    this.hKey = this.input.keyboard?.addKey('H')!;
   }
 
   postUpdate() {
@@ -271,6 +267,12 @@ export class Game extends Scene {
     if (dist != 0) {
       let vol = Math.max(0, Math.min(1, 50 / dist));
       this.waterfall.setVolume(vol);
+    }
+
+    if (this.input.keyboard?.checkDown(this.hKey, 20)) {
+      const date = CurrentDate;
+      setCurrentTime(new Date(date.getTime() + 2 * 60 * 1000));
+      this.adjustToTimeOfDay();
     }
 
     this.vignette.x = this.camera.worldView.centerX;

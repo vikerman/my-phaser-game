@@ -1,11 +1,54 @@
+import { CurrentDate } from '../objects/time';
+
 const SHADOW_SCALE_BASE_RADIUS = 64;
-const SHADOW_ALPHA_MAX = 0.9;
+const SHADOW_ALPHA_MAX = 0.8;
 const SHADOW_FALLLOFF_RATE = 1.4;
 const MIN_Y_SCALE = 1;
 const MAX_Y_SCALE = 5;
 const X_SCALE = 0.75;
 const ANGLE_DIFF_THRESHOLD = 0.01;
 const DISPLAY_HEIGHT_THRESHOLD = 32;
+const TWILIGHT_MIN = 6;
+const SHADOW_DAY_MIN = 7;
+const SHADOW_DAY_MAX = 17;
+const TWILIGHT_MAX = 18;
+const SHADOW_ALPHA_TWLIGHT = 0.15;
+const SUN_Y_SCALE_POW = 1.5;
+const SUN_Y_SCALE_FACTOR = 4;
+
+export function setSunShadowParams(shadowSprite: Phaser.GameObjects.Sprite) {
+  // Set the Angle based on time of day
+  // toFixed returns and string. The + converts it back to number.
+  const hrs = CurrentDate.getHours() + CurrentDate.getMinutes() / 60;
+  if (hrs < TWILIGHT_MIN || hrs > TWILIGHT_MAX) {
+    shadowSprite.setVisible(false);
+    return;
+  } else {
+    shadowSprite.setVisible(true);
+  }
+
+  // Goes from -1 tgo 1 based on time of day.
+  let factor = ((hrs - TWILIGHT_MIN) / (TWILIGHT_MAX - TWILIGHT_MIN) - 0.5) * 2;
+  let angle = (factor * Math.PI) / 2;
+  shadowSprite.setRotation(angle);
+
+  // Set the shadow length by time of the day.
+  let yScale = Math.max(
+    Math.min(
+      Math.pow(Math.abs(factor), SUN_Y_SCALE_POW) * SUN_Y_SCALE_FACTOR,
+      MAX_Y_SCALE,
+    ),
+    MIN_Y_SCALE,
+  );
+  shadowSprite.setScale(X_SCALE, Math.max(yScale, MIN_Y_SCALE));
+
+  // Set alpha based on time of day.
+  const alpha = Math.min(
+    1 + SHADOW_ALPHA_TWLIGHT - Math.abs(factor),
+    SHADOW_ALPHA_MAX,
+  );
+  shadowSprite.setAlpha(alpha);
+}
 
 /**
  * Calculate the shadow parameters (scale, rotation and alpha) of the shadow
@@ -36,13 +79,27 @@ export function setNightShadowParams(
   }
   shadowSprite.setScale(X_SCALE, Math.max(yScale, MIN_Y_SCALE));
 
+  // In day time decrease the light shadow by 2.
+  const hrs = CurrentDate.getHours() + CurrentDate.getMinutes() / 60;
+  const dayTimeFactor =
+    hrs >= SHADOW_DAY_MIN && hrs <= SHADOW_DAY_MAX
+      ? 0.15
+      : hrs >= TWILIGHT_MIN && hrs <= TWILIGHT_MAX
+        ? 0.5
+        : 1;
+
   // Set the strength based on distance
-  const alpha1 = Math.max(SHADOW_ALPHA_MAX - dist / l.radius, 0) * l.intensity;
+  const alpha1 =
+    Math.max(SHADOW_ALPHA_MAX - dist / l.radius, 0) *
+    l.intensity *
+    dayTimeFactor;
   let alpha2 =
     Math.max(
       SHADOW_ALPHA_MAX -
         (dist + shadowSprite.displayHeight * SHADOW_FALLLOFF_RATE) / l.radius,
       0,
-    ) * l.intensity;
+    ) *
+    l.intensity *
+    dayTimeFactor;
   shadowSprite.setAlpha(alpha2, alpha2, alpha1, alpha1);
 }

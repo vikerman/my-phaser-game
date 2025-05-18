@@ -1,6 +1,5 @@
-import { setNightShadowParams } from '../utils/shadowCalc';
+import { setNightShadowParams, setSunShadowParams } from '../utils/shadowCalc';
 import { isSafari } from '../utils/useragent';
-import { CurrentTimeOfDay, TimesOfDay } from './time';
 
 /**
  * A Character class to hold everything related to a character.
@@ -41,6 +40,7 @@ export class Character {
     Phaser.GameObjects.Light,
     Phaser.GameObjects.Sprite
   >();
+  private readonly sunShadow: Phaser.GameObjects.Sprite;
   private readonly sprite: Phaser.GameObjects.Sprite;
   private playerLight: Phaser.GameObjects.Light;
   private readonly key: string;
@@ -59,7 +59,6 @@ export class Character {
   private south = 0;
 
   public isMainPlayer;
-  lastTimeOfDay: string;
 
   // Methods
   constructor(
@@ -217,6 +216,16 @@ export class Character {
     south.onCollideEndCallback = (pair: MatterJS.IPair) => {
       this.onSensorCollideEnd(pair, 's');
     };
+
+    // Create shadow sprite for day time.
+    this.sunShadow = this.scene.add
+      .sprite(0, SPRITE_Y_ADJUST + 5, this.key, 0)
+      .setOrigin(0.5, 1)
+      .setLighting(true)
+      .setTintFill(0x000000);
+    (this.container as Phaser.GameObjects.Container)
+      .add(this.sunShadow)
+      .moveBelow(this.sunShadow, this.sprite);
 
     // Add a player Light
     this.playerLight = scene.lights.addLight(
@@ -538,15 +547,10 @@ export class Character {
 
     this.playerLight.x = worldPos.x - 8;
     this.playerLight.y = worldPos.y + 16;
-    if (this.lastTimeOfDay != CurrentTimeOfDay) {
-      if (CurrentTimeOfDay == TimesOfDay.DAY) {
-        this.playerLight.setVisible(false);
-      }
-      if (CurrentTimeOfDay == TimesOfDay.NIGHT) {
-        this.playerLight.setVisible(true);
-      }
-    }
-    this.lastTimeOfDay = CurrentTimeOfDay;
+
+    // Update the sun shadow
+    setSunShadowParams(this.sunShadow);
+    this.sunShadow.frame = this.sprite.frame;
 
     // Create shadow for each light in the scene - if within the light radius.
     for (const light of this.scene.lights.getLights(
