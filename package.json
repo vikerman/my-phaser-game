@@ -20,12 +20,14 @@
     "build-nolog": "vite build --config vite/config.prod.mjs"
   },
   "devDependencies": {
+    "@types/stats.js": "^0.17.4",
     "prettier": "3.5.3",
     "terser": "^5.31.0",
     "typescript": "^5.4.5",
     "vite": "^6.3.0"
   },
   "dependencies": {
-    "phaser": "^4.0.0-rc.2"
+    "phaser": "^4.0.0-rc.2",
+    "stats.js": "^0.17.0"
   }
 }
