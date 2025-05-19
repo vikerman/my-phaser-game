@@ -3,12 +3,12 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "public/assets/maps/forest.tmj",
     "expandedProjectPaths": [
-        "public/assets/maps",
-        "public/assets",
         "public",
-        "."
+        ".",
+        "public/assets",
+        "public/assets/maps"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -22,7 +22,7 @@
         },
         "public/assets/maps/forest.tmj": {
             "scale": 1.175625,
-            "selectedLayer": 0,
+            "selectedLayer": 1,
             "viewCenter": {
                 "x": 685.1674641148327,
                 "y": 440.1913875598086

@@ -19,7 +19,7 @@ function setCurrentTimeOfDay(time: TimeOfDay) {
 export function setCurrentTime(date: Date) {
   CurrentDate = date;
   const hours = date.getHours();
-  if (hours >= 6 && hours <= 18) {
+  if (hours >= 6 && hours < 18) {
     setCurrentTimeOfDay(TimesOfDay.DAY);
   } else {
     setCurrentTimeOfDay(TimesOfDay.NIGHT);
