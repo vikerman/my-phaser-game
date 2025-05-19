@@ -42,6 +42,7 @@ const config: Types.Core.GameConfig = {
     },
   },
   desynchronized: true,
+  preserveDrawingBuffer: true,
   scene: [Boot, Preloader, Glow, Glow2, /* MainMenu, */ MainGame, GameOver],
 };
 window.devicePixelRatio = 1;
