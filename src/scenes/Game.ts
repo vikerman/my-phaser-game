@@ -28,6 +28,8 @@ export class Game extends Scene {
   colorMatrix: Phaser.Display.ColorMatrix;
   threshold?: Phaser.Filters.Threshold;
   hKey: Phaser.Input.Keyboard.Key;
+  bloomFilters: Phaser.Filters.ParallelFilters;
+  bloomThreshold: Phaser.Filters.Threshold;
 
   constructor() {
     super('Game');
@@ -56,6 +58,8 @@ export class Game extends Scene {
         this.threshold.destroy();
       }
       this.threshold = this.camera.filters.internal.addThreshold(0.05, 0.9);
+      this.bloomThreshold.setEdge(0.1, 0.9);
+      this.bloomFilters.blend.amount = 0.3;
     } else if (CurrentTimeOfDay == TimesOfDay.NIGHT) {
       this.lights.setAmbientColor(0x191c5c);
 
@@ -69,6 +73,8 @@ export class Game extends Scene {
         this.threshold.destroy();
       }
       this.threshold = this.camera.filters.internal.addThreshold(0.05, 0.5);
+      this.bloomThreshold.setEdge(0.03, 0.8);
+      this.bloomFilters.blend.amount = 0.8;
     }
   }
 
@@ -124,9 +130,7 @@ export class Game extends Scene {
     // Add a fixed light.
     const fixedPos = { x: playerPos.x, y: playerPos.y + 200 };
     const lightHeight = 50;
-    const color = 0x009cb1;
-    const minBloom = 0.3;
-    const maxBloom = 1.5;
+    const color = 0xff9060;
     const circle = this.add.circle(fixedPos.x, fixedPos.y, 5, color);
     circle.depth = circle.y + lightHeight;
 
@@ -151,14 +155,6 @@ export class Game extends Scene {
       duration: 1200,
     });
 
-    // Blooom!!!
-    circle.enableFilters();
-    const parallelFilters = circle.filters?.internal.addParallelFilters()!;
-    parallelFilters.top.addThreshold(0.1, 0.8);
-    parallelFilters.top.addBlur(1);
-    parallelFilters.blend.blendMode = Phaser.BlendModes.ADD;
-    parallelFilters.blend.amount = minBloom;
-
     this.add.tween({
       targets: circle,
       ease: 'Sine.easeInOut',
@@ -176,6 +172,7 @@ export class Game extends Scene {
       1,
       100,
     );
+
     const tween2 = this.tweens.add({
       targets: this.fixedLight,
       ease: 'Sine.easeInOut',
@@ -183,14 +180,6 @@ export class Game extends Scene {
       yoyo: true,
       repeat: -1,
       duration: 1200,
-      onUpdate: (_: Phaser.Tweens.Tween, __: any, key: string) => {
-        if (key == 'intensity') {
-          // Adjust light brightness based on this intentsity.
-          parallelFilters.blend.amount =
-            minBloom +
-            ((this.fixedLight.intensity - 0.1) / 1.4) * (maxBloom - minBloom);
-        }
-      },
       onRepeat: () => {
         tween2.duration = 100 + Math.random() * 900;
       },
@@ -234,6 +223,13 @@ export class Game extends Scene {
       .brightness(1.1, true);
 
     this.camera.filters.internal.addTiltShift(0.6, 2, 0, 0, 0.4, 0.9);
+
+    // Blooom!!!
+    this.bloomFilters = this.camera.filters.internal.addParallelFilters()!;
+    this.bloomThreshold = this.bloomFilters.top.addThreshold(0.03, 0.8);
+    this.bloomFilters.top.addBlur(1, 2, 2, 3);
+    this.bloomFilters.blend.blendMode = Phaser.BlendModes.ADD;
+    this.bloomFilters.blend.amount = 1;
 
     // Set the time of day to match local time.
     setCurrentTime(new Date());

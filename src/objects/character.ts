@@ -229,12 +229,12 @@ export class Character {
 
     // Add a player Light
     this.playerLight = scene.lights.addLight(
-      this.sprite.getWorldPoint().x - 8,
+      this.sprite.getWorldPoint().x - 16,
       this.sprite.getWorldPoint().y + 16,
       256,
       0xffa500,
-      1,
-      64,
+      0.8,
+      30,
     );
     const tween = scene.tweens.add({
       targets: this.playerLight,
@@ -545,8 +545,8 @@ export class Character {
       }
     }
 
-    this.playerLight.x = worldPos.x - 8;
-    this.playerLight.y = worldPos.y + 16;
+    this.playerLight.x = worldPos.x - 16;
+    this.playerLight.y = worldPos.y - 16;
 
     // Update the sun shadow
     setSunShadowParams(this.sunShadow);

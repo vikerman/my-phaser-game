@@ -2,6 +2,7 @@ import { CurrentDate } from '../objects/time';
 
 const SHADOW_SCALE_BASE_RADIUS = 64;
 const SHADOW_ALPHA_MAX = 0.8;
+const SHADOW_DAY_ALPHA_MAX = 0.6;
 const SHADOW_FALLLOFF_RATE = 1.4;
 const MIN_Y_SCALE = 1;
 const MAX_Y_SCALE = 5;
@@ -45,7 +46,7 @@ export function setSunShadowParams(shadowSprite: Phaser.GameObjects.Sprite) {
   // Set alpha based on time of day.
   const alpha = Math.min(
     1 + SHADOW_ALPHA_TWLIGHT - Math.abs(factor),
-    SHADOW_ALPHA_MAX,
+    SHADOW_DAY_ALPHA_MAX,
   );
   shadowSprite.setAlpha(alpha);
 }
