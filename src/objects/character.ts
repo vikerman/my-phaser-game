@@ -4,10 +4,11 @@ import { isSafari } from '../utils/useragent';
 /**
  * A Character class to hold everything related to a character.
  */
-const WALK_SPEED = 1;
+const WALK_SPEED = 1.2;
 const DIAGONAL_SCALE = 1.0 / Math.SQRT2;
 const SENSOR_WIDTH = 2;
 const SPRITE_Y_ADJUST = 3;
+const JOYSTICK_THRESHOLD = 0.3;
 
 let USE_BITMAP_MASK = !isSafari() && false;
 
@@ -233,13 +234,13 @@ export class Character {
       this.sprite.getWorldPoint().y + 16,
       256,
       0xffa500,
-      0.8,
+      1,
       30,
     );
     const tween = scene.tweens.add({
       targets: this.playerLight,
       ease: 'Bounce',
-      intensity: 0.1,
+      intensity: 0.8,
       yoyo: true,
       repeat: -1,
       duration: 1000,
@@ -479,42 +480,80 @@ export class Character {
       return;
     }
 
-    const diagonal =
-      (this.cursor.left.isDown || this.cursor.right.isDown) &&
-      (this.cursor.up.isDown || this.cursor.down.isDown);
-    let scale = 1.0;
-    if (diagonal) {
-      scale = DIAGONAL_SCALE;
+    const [gp] = navigator.getGamepads();
+    let walkVector = new Phaser.Math.Vector2();
+
+    const left =
+      this.cursor.left.isDown ||
+      (gp?.axes[0] && gp?.axes[0] < -JOYSTICK_THRESHOLD);
+    const right =
+      this.cursor.right.isDown ||
+      (gp?.axes[0] && gp?.axes[0] > JOYSTICK_THRESHOLD);
+
+    const up =
+      this.cursor.up.isDown ||
+      (gp?.axes[1] && gp?.axes[1] < -JOYSTICK_THRESHOLD);
+    const down =
+      this.cursor.down.isDown ||
+      (gp?.axes[1] && gp?.axes[1] > JOYSTICK_THRESHOLD);
+
+    // Set walk direction vector based on keyboard/gamepad joystick.
+    if (this.cursor.left.isDown) {
+      walkVector.x = -1;
     }
+    if (gp?.axes[0] && gp?.axes[0] < -JOYSTICK_THRESHOLD) {
+      walkVector.x = gp?.axes[0];
+    }
+    if (this.cursor.right.isDown) {
+      walkVector.x = 1;
+    }
+    if (gp?.axes[0] && gp?.axes[0] > JOYSTICK_THRESHOLD) {
+      walkVector.x = gp?.axes[0];
+    }
+
+    if (this.cursor.up.isDown) {
+      walkVector.y = -1;
+    }
+    if (gp?.axes[1] && gp?.axes[1] < -JOYSTICK_THRESHOLD) {
+      walkVector.y = gp?.axes[1];
+    }
+    if (this.cursor.down.isDown) {
+      walkVector.y = 1;
+    }
+    if (gp?.axes[1] && gp?.axes[1] > JOYSTICK_THRESHOLD) {
+      walkVector.y = gp?.axes[1];
+    }
+
+    walkVector.normalize();
 
     let dir: Direction | null = null;
     let moving = false;
 
     const body = this.container as Phaser.Physics.Matter.Sprite;
-    if (this.cursor.up.isDown) {
+    if (up) {
       dir = 'up';
       if (this.north == 0) {
-        body.setVelocityY(-WALK_SPEED * scale);
+        body.setVelocityY(WALK_SPEED * walkVector.y);
         moving = true;
       }
-    } else if (this.cursor.down.isDown) {
+    } else if (down) {
       dir = 'down';
       if (this.south == 0) {
-        body.setVelocityY(WALK_SPEED * scale);
+        body.setVelocityY(WALK_SPEED * walkVector.y);
         moving = true;
       }
     }
 
-    if (this.cursor.left.isDown) {
+    if (left) {
       dir = 'left';
       if (this.west == 0) {
-        body.setVelocityX(-WALK_SPEED * scale);
+        body.setVelocityX(WALK_SPEED * walkVector.x);
         moving = true;
       }
-    } else if (this.cursor.right.isDown) {
+    } else if (right) {
       dir = 'right';
       if (this.east == 0) {
-        body.setVelocityX(WALK_SPEED * scale);
+        body.setVelocityX(WALK_SPEED * walkVector.x);
         moving = true;
       }
     }
