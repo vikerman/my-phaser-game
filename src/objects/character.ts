@@ -5,7 +5,6 @@ import { isSafari } from '../utils/useragent';
  * A Character class to hold everything related to a character.
  */
 const WALK_SPEED = 1.2;
-const DIAGONAL_SCALE = 1.0 / Math.SQRT2;
 const SENSOR_WIDTH = 2;
 const SPRITE_Y_ADJUST = 3;
 const JOYSTICK_THRESHOLD = 0.3;
@@ -234,18 +233,17 @@ export class Character {
       this.sprite.getWorldPoint().y + 16,
       256,
       0xffa500,
-      1,
-      30,
+      0.8,
     );
     const tween = scene.tweens.add({
       targets: this.playerLight,
       ease: 'Bounce',
-      intensity: 0.8,
+      intensity: 0.5,
       yoyo: true,
       repeat: -1,
-      duration: 1000,
+      duration: 500,
       onRepeat: () => {
-        tween.duration = 100 + Math.random() * 900;
+        tween.duration = 100 + Math.random() * 400;
       },
     });
     const keyObject = scene.input.keyboard?.addKey('l');
@@ -480,7 +478,14 @@ export class Character {
       return;
     }
 
-    const [gp] = navigator.getGamepads();
+    const gps = navigator.getGamepads();
+    // Get the first Gamepad that is not null
+    let gp: Gamepad | null = null;
+    for (const g of gps) {
+      if (g != null) {
+        gp = g;
+      }
+    }
     let walkVector = new Phaser.Math.Vector2();
 
     const left =

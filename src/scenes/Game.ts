@@ -58,7 +58,7 @@ export class Game extends Scene {
         this.threshold.destroy();
       }
       this.threshold = this.camera.filters.internal.addThreshold(0.05, 0.9);
-      this.bloomThreshold.setEdge(0.1, 0.9);
+      this.bloomThreshold.setEdge(0.1, 0.95);
       this.bloomFilters.blend.amount = 0.3;
     } else if (CurrentTimeOfDay == TimesOfDay.NIGHT) {
       this.lights.setAmbientColor(0x191c5c);
@@ -73,8 +73,8 @@ export class Game extends Scene {
         this.threshold.destroy();
       }
       this.threshold = this.camera.filters.internal.addThreshold(0.05, 0.5);
-      this.bloomThreshold.setEdge(0.1, 0.7);
-      this.bloomFilters.blend.amount = 0.8;
+      this.bloomThreshold.setEdge(0.05, 0.9);
+      this.bloomFilters.blend.amount = 1;
     }
   }
 
@@ -169,14 +169,13 @@ export class Game extends Scene {
       playerPos.y + 200,
       256,
       color,
-      1.2,
-      100,
+      1,
     );
 
     const tween2 = this.tweens.add({
       targets: this.fixedLight,
       ease: 'Sine.easeInOut',
-      intensity: 0.9,
+      intensity: 0.7,
       yoyo: true,
       repeat: -1,
       duration: 1200,
@@ -226,7 +225,7 @@ export class Game extends Scene {
 
     // Blooom!!!
     this.bloomFilters = this.camera.filters.internal.addParallelFilters()!;
-    this.bloomThreshold = this.bloomFilters.top.addThreshold(0.03, 0.8);
+    this.bloomThreshold = this.bloomFilters.top.addThreshold(0.05, 0.9);
     this.bloomFilters.top.addBlur(2);
     this.bloomFilters.blend.blendMode = Phaser.BlendModes.ADD;
     this.bloomFilters.blend.amount = 1;
