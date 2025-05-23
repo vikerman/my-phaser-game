@@ -46,6 +46,7 @@ export class Character {
   private readonly key: string;
   private cursor: Phaser.Types.Input.Keyboard.CursorKeys | undefined =
     undefined;
+  private keys: { [key: string]: Phaser.Input.Keyboard.Key };
   private hitBox: MatterJS.BodyType;
   private obstructingObjects = new Map<
     Phaser.GameObjects.Sprite,
@@ -473,6 +474,12 @@ export class Character {
     // Get Cursor keys if keyboard is present.
     if (this.cursor == null) {
       this.cursor = this.sprite.scene.input.keyboard?.createCursorKeys();
+      this.keys = this.sprite.scene.input.keyboard?.addKeys({
+        up: 'W',
+        down: 'S',
+        left: 'A',
+        right: 'D',
+      }) as typeof this.keys;
     }
     if (this.cursor == null) {
       return;
@@ -490,39 +497,43 @@ export class Character {
 
     const left =
       this.cursor.left.isDown ||
+      this.keys['left'].isDown ||
       (gp?.axes[0] && gp?.axes[0] < -JOYSTICK_THRESHOLD);
     const right =
       this.cursor.right.isDown ||
+      this.keys['right'].isDown ||
       (gp?.axes[0] && gp?.axes[0] > JOYSTICK_THRESHOLD);
 
     const up =
       this.cursor.up.isDown ||
+      this.keys['up'].isDown ||
       (gp?.axes[1] && gp?.axes[1] < -JOYSTICK_THRESHOLD);
     const down =
       this.cursor.down.isDown ||
+      this.keys['down'].isDown ||
       (gp?.axes[1] && gp?.axes[1] > JOYSTICK_THRESHOLD);
 
     // Set walk direction vector based on keyboard/gamepad joystick.
-    if (this.cursor.left.isDown) {
+    if (this.cursor.left.isDown || this.keys['left'].isDown) {
       walkVector.x = -1;
     }
     if (gp?.axes[0] && gp?.axes[0] < -JOYSTICK_THRESHOLD) {
       walkVector.x = gp?.axes[0];
     }
-    if (this.cursor.right.isDown) {
+    if (this.cursor.right.isDown || this.keys['right'].isDown) {
       walkVector.x = 1;
     }
     if (gp?.axes[0] && gp?.axes[0] > JOYSTICK_THRESHOLD) {
       walkVector.x = gp?.axes[0];
     }
 
-    if (this.cursor.up.isDown) {
+    if (this.cursor.up.isDown || this.keys['up'].isDown) {
       walkVector.y = -1;
     }
     if (gp?.axes[1] && gp?.axes[1] < -JOYSTICK_THRESHOLD) {
       walkVector.y = gp?.axes[1];
     }
-    if (this.cursor.down.isDown) {
+    if (this.cursor.down.isDown || this.keys['down'].isDown) {
       walkVector.y = 1;
     }
     if (gp?.axes[1] && gp?.axes[1] > JOYSTICK_THRESHOLD) {

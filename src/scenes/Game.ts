@@ -58,8 +58,8 @@ export class Game extends Scene {
         this.threshold.destroy();
       }
       this.threshold = this.camera.filters.internal.addThreshold(0.05, 0.9);
-      this.bloomThreshold.setEdge(0.1, 0.95);
-      this.bloomFilters.blend.amount = 0.3;
+      this.bloomThreshold.setEdge(0.7, 1);
+      this.bloomFilters.blend.amount = 0.6;
     } else if (CurrentTimeOfDay == TimesOfDay.NIGHT) {
       this.lights.setAmbientColor(0x191c5c);
 
