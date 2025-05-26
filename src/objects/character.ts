@@ -504,24 +504,6 @@ export class Character {
       this.lastPressed = false;
     }
 
-    const left =
-      this.cursor.left.isDown ||
-      this.keys['left'].isDown ||
-      (gp?.axes[0] && gp?.axes[0] < -JOYSTICK_THRESHOLD);
-    const right =
-      this.cursor.right.isDown ||
-      this.keys['right'].isDown ||
-      (gp?.axes[0] && gp?.axes[0] > JOYSTICK_THRESHOLD);
-
-    const up =
-      this.cursor.up.isDown ||
-      this.keys['up'].isDown ||
-      (gp?.axes[1] && gp?.axes[1] < -JOYSTICK_THRESHOLD);
-    const down =
-      this.cursor.down.isDown ||
-      this.keys['down'].isDown ||
-      (gp?.axes[1] && gp?.axes[1] > JOYSTICK_THRESHOLD);
-
     // Set walk direction vector based on keyboard/gamepad joystick.
     if (this.cursor.left.isDown || this.keys['left'].isDown) {
       walkVector.x = -1;
@@ -555,13 +537,13 @@ export class Character {
     let moving = false;
 
     const body = this.container as Phaser.Physics.Matter.Sprite;
-    if (up) {
+    if (walkVector.y < 0) {
       dir = 'up';
       if (this.north == 0) {
         body.setVelocityY(WALK_SPEED * walkVector.y);
         moving = true;
       }
-    } else if (down) {
+    } else if (walkVector.y > 0) {
       dir = 'down';
       if (this.south == 0) {
         body.setVelocityY(WALK_SPEED * walkVector.y);
@@ -569,13 +551,13 @@ export class Character {
       }
     }
 
-    if (left) {
+    if (walkVector.x < 0) {
       dir = 'left';
       if (this.west == 0) {
         body.setVelocityX(WALK_SPEED * walkVector.x);
         moving = true;
       }
-    } else if (right) {
+    } else if (walkVector.x > 0) {
       dir = 'right';
       if (this.east == 0) {
         body.setVelocityX(WALK_SPEED * walkVector.x);
