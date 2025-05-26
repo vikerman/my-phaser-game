@@ -60,6 +60,7 @@ export class Character {
   private south = 0;
 
   public isMainPlayer;
+  private lastPressed: boolean = false;
 
   // Methods
   constructor(
@@ -494,6 +495,14 @@ export class Character {
       }
     }
     let walkVector = new Phaser.Math.Vector2();
+
+    if (gp?.buttons[5].pressed && !this.lastPressed) {
+      this.lastPressed = true;
+      this.playerLight.setVisible(!this.playerLight.visible);
+    }
+    if (!gp?.buttons[5].pressed) {
+      this.lastPressed = false;
+    }
 
     const left =
       this.cursor.left.isDown ||

@@ -42,6 +42,7 @@ const GLOBAL_SETTINGS = [
     bloomEdge1: 0.05,
     bloomEdge2: 0.7,
     bloomAmount: 0.4,
+    nightSound: false,
   },
   {
     time: 8,
@@ -53,13 +54,23 @@ const GLOBAL_SETTINGS = [
     bloomEdge1: 0.1,
     bloomEdge2: 0.9,
     bloomAmount: 0.3,
-    nightSound: false,
   },
   {
     time: 12,
     ambient: 0xaaaaaa,
     saturate: -0.2,
-    brightness: 1.2,
+    brightness: 1.3,
+    threshold1: 0.05,
+    threshold2: 0.9,
+    bloomEdge1: 0.1,
+    bloomEdge2: 0.9,
+    bloomAmount: 0.2,
+  },
+  {
+    time: 15,
+    ambient: 0xaaaaaa,
+    saturate: -0.2,
+    brightness: 1.3,
     threshold1: 0.05,
     threshold2: 0.9,
     bloomEdge1: 0.1,
@@ -75,7 +86,7 @@ const GLOBAL_SETTINGS = [
     threshold2: 0.9,
     bloomEdge1: 0.1,
     bloomEdge2: 0.85,
-    bloomAmount: 0.6,
+    bloomAmount: 0.4,
   },
   {
     time: 18,
@@ -86,7 +97,8 @@ const GLOBAL_SETTINGS = [
     threshold2: 0.8,
     bloomEdge1: 0.06,
     bloomEdge2: 0.8,
-    bloomAmount: 0.75,
+    bloomAmount: 0.5,
+    nightSound: true,
   },
   {
     time: 19,
@@ -98,7 +110,6 @@ const GLOBAL_SETTINGS = [
     bloomEdge1: 0.03,
     bloomEdge2: 0.8,
     bloomAmount: 0.8,
-    nightSound: true,
   },
   {
     time: 20,
@@ -110,7 +121,6 @@ const GLOBAL_SETTINGS = [
     bloomEdge1: 0.03,
     bloomEdge2: 0.8,
     bloomAmount: 0.9,
-    nightSound: true,
   },
   {
     time: 22,
@@ -139,6 +149,7 @@ export class Game extends Scene {
   colorMatrix: Phaser.Display.ColorMatrix;
   threshold?: Phaser.Filters.Threshold;
   hKey: Phaser.Input.Keyboard.Key;
+  gKey: Phaser.Input.Keyboard.Key;
   bloomFilters: Phaser.Filters.ParallelFilters;
   bloomThreshold: Phaser.Filters.Threshold;
 
@@ -407,6 +418,7 @@ export class Game extends Scene {
     });
 
     this.hKey = this.input.keyboard?.addKey('H')!;
+    this.gKey = this.input.keyboard?.addKey('G')!;
   }
 
   override update() {
@@ -421,8 +433,28 @@ export class Game extends Scene {
       this.waterfall.setVolume(vol);
     }
 
-    if (this.input.keyboard?.checkDown(this.hKey, 20)) {
+    // TODO: Extract this to a util function
+    const gps = navigator.getGamepads();
+    // Get the first Gamepad that is not null
+    let gp: Gamepad | null = null;
+    for (const g of gps) {
+      if (g != null) {
+        gp = g;
+      }
+    }
+
+    if (
+      this.input.keyboard?.checkDown(this.hKey, 20) ||
+      gp?.buttons[7].pressed
+    ) {
       const newTime = new Date(CurrentTime.getTime() + 2 * 60 * 1000);
+      console.log(newTime.getHours(), newTime.getMinutes());
+      setCurrentTime(newTime);
+    } else if (
+      this.input.keyboard?.checkDown(this.gKey, 20) ||
+      gp?.buttons[6].pressed
+    ) {
+      const newTime = new Date(CurrentTime.getTime() - 2 * 60 * 1000);
       console.log(newTime.getHours(), newTime.getMinutes());
       setCurrentTime(newTime);
     }
