@@ -1,17 +1,129 @@
 import { Scene } from 'phaser';
 import { Character } from '../objects/character';
 import { createObjectsFromLayer } from '../utils/objectLayer';
-import {
-  CurrentDate,
-  CurrentTimeOfDay,
-  setCurrentTime,
-  TimesOfDay,
-} from '../objects/time';
+import { CurrentTime, setCurrentTime } from '../objects/time';
 
 export type SoundType =
   | Phaser.Sound.NoAudioSound
   | Phaser.Sound.HTML5AudioSound
   | Phaser.Sound.WebAudioSound;
+
+// Lighting
+// Sunrise/Sunset
+// 0xfff474
+// 0xfd5e53
+// 0x3c3b5f
+// 0x191c5c
+// Moonlight
+// 0x04084f
+// Bright
+// 0xaaaaaa
+
+const GLOBAL_SETTINGS = [
+  // Keep sorted by time.
+  {
+    time: 3,
+    ambient: 0x04084f,
+    saturate: -0.4,
+    brightness: 0.8,
+    threshold1: 0.05,
+    threshold2: 0.5,
+    bloomEdge1: 0.03,
+    bloomEdge2: 0.8,
+    bloomAmount: 0.9,
+  },
+  {
+    time: 7,
+    ambient: 0xe08d3c,
+    saturate: -0.2,
+    brightness: 0.9,
+    threshold1: 0.05,
+    threshold2: 0.9,
+    bloomEdge1: 0.05,
+    bloomEdge2: 0.7,
+    bloomAmount: 0.4,
+  },
+  {
+    time: 8,
+    ambient: 0xfff474,
+    saturate: -0.2,
+    brightness: 1,
+    threshold1: 0.05,
+    threshold2: 0.9,
+    bloomEdge1: 0.1,
+    bloomEdge2: 0.9,
+    bloomAmount: 0.3,
+    nightSound: false,
+  },
+  {
+    time: 12,
+    ambient: 0xaaaaaa,
+    saturate: -0.2,
+    brightness: 1.2,
+    threshold1: 0.05,
+    threshold2: 0.9,
+    bloomEdge1: 0.1,
+    bloomEdge2: 0.9,
+    bloomAmount: 0.2,
+  },
+  {
+    time: 17,
+    ambient: 0xaaaaaa,
+    saturate: -0.2,
+    brightness: 1.1,
+    threshold1: 0.05,
+    threshold2: 0.9,
+    bloomEdge1: 0.1,
+    bloomEdge2: 0.85,
+    bloomAmount: 0.6,
+  },
+  {
+    time: 18,
+    ambient: 0xe08d3c,
+    saturate: -0.3,
+    brightness: 0.9,
+    threshold1: 0.05,
+    threshold2: 0.8,
+    bloomEdge1: 0.06,
+    bloomEdge2: 0.8,
+    bloomAmount: 0.75,
+  },
+  {
+    time: 19,
+    ambient: 0x1e2208,
+    saturate: -0.3,
+    brightness: 0.9,
+    threshold1: 0.05,
+    threshold2: 0.8,
+    bloomEdge1: 0.03,
+    bloomEdge2: 0.8,
+    bloomAmount: 0.8,
+    nightSound: true,
+  },
+  {
+    time: 20,
+    ambient: 0x191c5c,
+    saturate: -0.4,
+    brightness: 0.9,
+    threshold1: 0.05,
+    threshold2: 0.7,
+    bloomEdge1: 0.03,
+    bloomEdge2: 0.8,
+    bloomAmount: 0.9,
+    nightSound: true,
+  },
+  {
+    time: 22,
+    ambient: 0x04084f,
+    saturate: -0.4,
+    brightness: 0.8,
+    threshold1: 0.05,
+    threshold2: 0.5,
+    bloomEdge1: 0.03,
+    bloomEdge2: 0.8,
+    bloomAmount: 0.9,
+  },
+];
 
 export class Game extends Scene {
   camera: Phaser.Cameras.Scene2D.Camera;
@@ -20,7 +132,6 @@ export class Game extends Scene {
   player: Character;
   fixedLight: Phaser.GameObjects.Light;
   waterfall: SoundType;
-  fireSound: SoundType;
   nightSound: SoundType;
   waterfallPos: Phaser.Math.Vector2;
   sprites: Phaser.GameObjects.Sprite[];
@@ -35,47 +146,96 @@ export class Game extends Scene {
     super('Game');
   }
 
-  private adjustToTimeOfDay() {
-    if (CurrentTimeOfDay == TimesOfDay.DAY) {
-      // Lighting
-      // Sunset
-      // 0xfff474
-      // 0xfd5e53
-      // 0x3c3b5f
-      // 0x191c5c
-      // Moonlight
-      // 0x04084f
-      // Bright
-      // 0xaaaaaa
-      this.lights.setAmbientColor(0xaaaaaa);
-
-      this.fireSound.pause();
-      this.nightSound.pause();
-
-      this.colorMatrix.reset().saturate(-0.2).brightness(1.2, true);
-
-      if (this.threshold != null) {
-        this.threshold.destroy();
-      }
-      this.threshold = this.camera.filters.internal.addThreshold(0.05, 0.9);
-      this.bloomThreshold.setEdge(0.7, 1);
-      this.bloomFilters.blend.amount = 0.6;
-    } else if (CurrentTimeOfDay == TimesOfDay.NIGHT) {
-      this.lights.setAmbientColor(0x191c5c);
-
-      this.fireSound.play();
-      this.nightSound.play();
-
-      this.colorMatrix.reset().saturate(-0.4).brightness(0.9, true);
-
-      // So much better in low light!!!
-      if (this.threshold != null) {
-        this.threshold.destroy();
-      }
-      this.threshold = this.camera.filters.internal.addThreshold(0.05, 0.5);
-      this.bloomThreshold.setEdge(0.05, 0.9);
-      this.bloomFilters.blend.amount = 1;
+  static getInter(
+    field: string,
+    curr: Record<string, any>,
+    next: Record<string, any>,
+    factor: number,
+  ) {
+    let val;
+    if (field == 'ambient') {
+      const colorOut = Phaser.Display.Color.Interpolate.ColorWithColor(
+        Phaser.Display.Color.ValueToColor(curr[field]),
+        Phaser.Display.Color.ValueToColor(next[field]),
+        1,
+        factor,
+      );
+      val = colorOut.color;
+      // console.log(`${field}: ${val.toString(16)}`);
+    } else {
+      val = curr[field] + (next[field] - curr[field]) * factor;
+      // console.log(`${field}: ${val}`);
     }
+    // if (field == 'ambient') {
+    //   console.log(factor);
+    // }
+    // if (field === 'bloomAmount') {
+    //   console.log('\n');
+    // }
+    return val;
+  }
+
+  private adjustToTimeOfDay() {
+    const date = CurrentTime;
+    const hrs = date.getHours() + date.getMinutes() / 60;
+
+    let curr = GLOBAL_SETTINGS[GLOBAL_SETTINGS.length - 1];
+    let next = GLOBAL_SETTINGS[0];
+    let i = 0;
+    for (const s of GLOBAL_SETTINGS) {
+      if (hrs > s.time) {
+        curr = s;
+        const nextIndex = i < GLOBAL_SETTINGS.length - 1 ? i + 1 : 0;
+        next = GLOBAL_SETTINGS[nextIndex];
+        if (hrs <= next.time) {
+          break;
+        }
+      }
+      i++;
+    }
+    let totalDiff = next.time - curr.time;
+    if (totalDiff < 0) {
+      totalDiff += 24;
+    }
+    let diff = hrs - curr.time;
+    if (diff < 0) {
+      diff += 24;
+    }
+    const factor = diff / totalDiff;
+
+    this.lights.setAmbientColor(Game.getInter('ambient', curr, next, factor));
+
+    if (curr.nightSound != null) {
+      if (curr.nightSound && !this.nightSound.isPlaying) {
+        this.nightSound.play();
+      }
+      if (!curr.nightSound && !this.nightSound.isPaused) {
+        this.nightSound.pause();
+      }
+    }
+
+    this.colorMatrix
+      .reset()
+      .saturate(Game.getInter('saturate', curr, next, factor))
+      .brightness(Game.getInter('brightness', curr, next, factor), true);
+
+    if (this.threshold != null) {
+      this.threshold.destroy();
+    }
+    this.threshold = this.camera.filters.internal.addThreshold(
+      Game.getInter('threshold1', curr, next, factor),
+      Game.getInter('threshold2', curr, next, factor),
+    );
+    this.bloomThreshold.setEdge(
+      Game.getInter('bloomEdge1', curr, next, factor),
+      Game.getInter('bloomEdge2', curr, next, factor),
+    );
+    this.bloomFilters.blend.amount = Game.getInter(
+      'bloomAmount',
+      curr,
+      next,
+      factor,
+    );
   }
 
   create() {
@@ -186,12 +346,6 @@ export class Game extends Scene {
 
     // Sounds
 
-    // Fire idle sound
-    this.fireSound = this.sound.add('fire-idle', {
-      loop: true,
-      volume: 0.1,
-    });
-
     // Ambient night sound
     this.nightSound = this.sound.add('night', {
       loop: true,
@@ -232,21 +386,20 @@ export class Game extends Scene {
 
     // Set the time of day to match local time.
     setCurrentTime(new Date());
-    this.adjustToTimeOfDay();
 
     // Setup key for daytime toggle.
     const tKey = this.input.keyboard?.addKey('T');
     tKey?.on('down', () => {
-      if (CurrentTimeOfDay == TimesOfDay.DAY) {
+      const hrs = CurrentTime.getHours();
+      if (hrs >= 6 && hrs <= 18) {
         const dt = new Date();
-        dt.setHours(23);
+        dt.setHours(21);
         setCurrentTime(dt);
       } else {
         const dt = new Date();
-        dt.setHours(8);
+        dt.setHours(7);
         setCurrentTime(dt);
       }
-      this.adjustToTimeOfDay();
     });
 
     this.events.on('postupdate', () => {
@@ -254,6 +407,10 @@ export class Game extends Scene {
     });
 
     this.hKey = this.input.keyboard?.addKey('H')!;
+  }
+
+  override update() {
+    this.adjustToTimeOfDay();
   }
 
   postUpdate() {
@@ -265,9 +422,9 @@ export class Game extends Scene {
     }
 
     if (this.input.keyboard?.checkDown(this.hKey, 20)) {
-      const date = CurrentDate;
-      setCurrentTime(new Date(date.getTime() + 2 * 60 * 1000));
-      this.adjustToTimeOfDay();
+      const newTime = new Date(CurrentTime.getTime() + 2 * 60 * 1000);
+      console.log(newTime.getHours(), newTime.getMinutes());
+      setCurrentTime(newTime);
     }
 
     this.vignette.x = this.camera.worldView.centerX;

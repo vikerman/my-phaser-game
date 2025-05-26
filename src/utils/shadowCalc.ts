@@ -1,26 +1,28 @@
-import { CurrentDate } from '../objects/time';
+import { CurrentTime } from '../objects/time';
 
 const SHADOW_SCALE_BASE_RADIUS = 64;
 const SHADOW_ALPHA_MAX = 0.8;
-const SHADOW_DAY_ALPHA_MAX = 0.4;
+const SHADOW_DAY_ALPHA_MAX = 0.8;
 const SHADOW_FALLLOFF_RATE = 1.4;
-const MIN_Y_SCALE = 1;
+const MIN_Y_SCALE = 1.1;
 const MAX_Y_SCALE = 5;
 const X_SCALE = 0.75;
 const ANGLE_DIFF_THRESHOLD = 0.01;
 const DISPLAY_HEIGHT_THRESHOLD = 32;
 const TWILIGHT_MIN = 6;
 const SHADOW_DAY_MIN = 7;
-const SHADOW_DAY_MAX = 17;
-const TWILIGHT_MAX = 18;
-const SHADOW_ALPHA_TWLIGHT = 0.15;
+const SHADOW_DAY_MAX = 18;
+const TWILIGHT_MAX = 19;
+const SHADOW_ALPHA_TWLIGHT = 0;
 const SUN_Y_SCALE_POW = 1.5;
 const SUN_Y_SCALE_FACTOR = 4;
+const LIGHT_SHADOW_IN_DAY_FACTOR = 0.2;
+const LIGHT_SHADOW_IN_TWILIGHT_FACTOR = 0.4;
 
 export function setSunShadowParams(shadowSprite: Phaser.GameObjects.Sprite) {
   // Set the Angle based on time of day
   // toFixed returns and string. The + converts it back to number.
-  const hrs = CurrentDate.getHours() + CurrentDate.getMinutes() / 60;
+  const hrs = CurrentTime.getHours() + CurrentTime.getMinutes() / 60;
   if (hrs < TWILIGHT_MIN || hrs > TWILIGHT_MAX) {
     shadowSprite.setVisible(false);
     return;
@@ -81,12 +83,12 @@ export function setNightShadowParams(
   shadowSprite.setScale(X_SCALE, Math.max(yScale, MIN_Y_SCALE));
 
   // In day time decrease the light shadow by 2.
-  const hrs = CurrentDate.getHours() + CurrentDate.getMinutes() / 60;
+  const hrs = CurrentTime.getHours() + CurrentTime.getMinutes() / 60;
   const dayTimeFactor =
     hrs >= SHADOW_DAY_MIN && hrs <= SHADOW_DAY_MAX
-      ? 0.15
+      ? LIGHT_SHADOW_IN_DAY_FACTOR
       : hrs >= TWILIGHT_MIN && hrs <= TWILIGHT_MAX
-        ? 0.5
+        ? LIGHT_SHADOW_IN_TWILIGHT_FACTOR
         : 1;
 
   // Set the strength based on distance
