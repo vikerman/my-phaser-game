@@ -31,7 +31,7 @@ const GLOBAL_SETTINGS = [
     bloomEdge1: 0.03,
     bloomEdge2: 0.8,
     bloomAmount: 0.9,
-    vignetteAlpha: 1,
+    vignetteAlpha: 0.8,
   },
   {
     time: 7,
@@ -141,7 +141,7 @@ const GLOBAL_SETTINGS = [
     bloomEdge1: 0.03,
     bloomEdge2: 0.8,
     bloomAmount: 0.9,
-    vignetteAlpha: 1,
+    vignetteAlpha: 0.8,
   },
 ];
 
