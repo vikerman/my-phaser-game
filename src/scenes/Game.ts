@@ -31,6 +31,7 @@ const GLOBAL_SETTINGS = [
     bloomEdge1: 0.03,
     bloomEdge2: 0.8,
     bloomAmount: 0.9,
+    vignetteAlpha: 1,
   },
   {
     time: 7,
@@ -43,50 +44,55 @@ const GLOBAL_SETTINGS = [
     bloomEdge2: 0.7,
     bloomAmount: 0.4,
     nightSound: false,
+    vignetteAlpha: 0.5,
   },
   {
     time: 8,
     ambient: 0xfff474,
     saturate: -0.2,
-    brightness: 1,
+    brightness: 0.8,
     threshold1: 0.05,
     threshold2: 0.9,
     bloomEdge1: 0.1,
     bloomEdge2: 0.9,
     bloomAmount: 0.3,
+    vignetteAlpha: 0.5,
   },
   {
     time: 12,
     ambient: 0xaaaaaa,
-    saturate: -0.2,
-    brightness: 1.3,
+    saturate: -0.3,
+    brightness: 1.1,
     threshold1: 0.05,
     threshold2: 0.9,
     bloomEdge1: 0.1,
     bloomEdge2: 0.9,
     bloomAmount: 0.2,
+    vignetteAlpha: 0.5,
   },
   {
     time: 15,
     ambient: 0xaaaaaa,
-    saturate: -0.2,
-    brightness: 1.3,
+    saturate: -0.3,
+    brightness: 1.1,
     threshold1: 0.05,
     threshold2: 0.9,
     bloomEdge1: 0.1,
     bloomEdge2: 0.9,
     bloomAmount: 0.2,
+    vignetteAlpha: 0.5,
   },
   {
     time: 17,
     ambient: 0xaaaaaa,
-    saturate: -0.2,
-    brightness: 1.1,
+    saturate: -0.3,
+    brightness: 1,
     threshold1: 0.05,
     threshold2: 0.9,
     bloomEdge1: 0.1,
     bloomEdge2: 0.85,
     bloomAmount: 0.4,
+    vignetteAlpha: 0.5,
   },
   {
     time: 18,
@@ -99,6 +105,7 @@ const GLOBAL_SETTINGS = [
     bloomEdge2: 0.8,
     bloomAmount: 0.5,
     nightSound: true,
+    vignetteAlpha: 0.5,
   },
   {
     time: 19,
@@ -110,6 +117,7 @@ const GLOBAL_SETTINGS = [
     bloomEdge1: 0.03,
     bloomEdge2: 0.8,
     bloomAmount: 0.8,
+    vignetteAlpha: 0.6,
   },
   {
     time: 20,
@@ -121,6 +129,7 @@ const GLOBAL_SETTINGS = [
     bloomEdge1: 0.03,
     bloomEdge2: 0.8,
     bloomAmount: 0.9,
+    vignetteAlpha: 0.8,
   },
   {
     time: 22,
@@ -132,6 +141,7 @@ const GLOBAL_SETTINGS = [
     bloomEdge1: 0.03,
     bloomEdge2: 0.8,
     bloomAmount: 0.9,
+    vignetteAlpha: 1,
   },
 ];
 
@@ -247,6 +257,7 @@ export class Game extends Scene {
       next,
       factor,
     );
+    this.vignette.setAlpha(Game.getInter('vignetteAlpha', curr, next, factor));
   }
 
   create() {
@@ -375,7 +386,7 @@ export class Game extends Scene {
     this.vignette.setScale(
       (1.05 * this.sys.canvas.width) / (640 * this.camera.zoom),
     );
-    this.vignette.setAlpha(1);
+    this.vignette.setAlpha(0.1);
     this.vignette.depth = 1000000;
 
     // Scene PostEffects.
@@ -447,14 +458,14 @@ export class Game extends Scene {
       gp?.buttons[7].pressed
     ) {
       const newTime = new Date(CurrentTime.getTime() + 2 * 60 * 1000);
-      console.log(newTime.getHours(), newTime.getMinutes());
+      // console.log(newTime.getHours(), newTime.getMinutes());
       setCurrentTime(newTime);
     } else if (
       this.input.keyboard?.checkDown(this.gKey, 20) ||
       gp?.buttons[6].pressed
     ) {
       const newTime = new Date(CurrentTime.getTime() - 2 * 60 * 1000);
-      console.log(newTime.getHours(), newTime.getMinutes());
+      // console.log(newTime.getHours(), newTime.getMinutes());
       setCurrentTime(newTime);
     }
 
