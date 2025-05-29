@@ -270,8 +270,6 @@ export class Game extends Scene {
       this.matter.world.convertTilemapLayer(
         layerObj as Phaser.Tilemaps.TilemapLayer,
       );
-      // layerObj.enableFilters();
-      // layerObj.filters?.internal.addColorMatrix().colorMatrix.brightness(0.9);
     }
 
     // Add objects and their colliders from the `objects` layer.
@@ -342,6 +340,7 @@ export class Game extends Scene {
       color,
       1,
     );
+    this.fixedLight.setDisplayOrigin(0, lightHeight);
 
     const tween2 = this.tweens.add({
       targets: this.fixedLight,

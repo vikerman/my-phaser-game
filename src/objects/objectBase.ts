@@ -46,7 +46,7 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
       // Calculate angle between light and character. (Note: charPos is mutated.)
       objPos
         .add({ x: 0, y: this.displayHeight / 2 })
-        .subtract({ x: l.x, y: l.y });
+        .subtract({ x: l.x + l.displayOriginX, y: l.y + l.displayOriginY });
       const dist = objPos.length();
       let dir = objPos.normalize();
       let shadowSprite = this.shadowSprites.get(l);

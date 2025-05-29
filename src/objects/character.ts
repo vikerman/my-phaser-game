@@ -233,10 +233,11 @@ export class Character {
     this.playerLight = scene.lights.addLight(
       this.sprite.getWorldPoint().x - 16,
       this.sprite.getWorldPoint().y + 16,
-      256,
+      400,
       0xffa500,
       0.8,
     );
+    this.playerLight.setDisplayOrigin(-8, 24);
     const tween = scene.tweens.add({
       targets: this.playerLight,
       ease: 'Bounce',
@@ -608,7 +609,7 @@ export class Character {
       // Calculate angle between light and character. (Note: charPos is mutated.)
       charPos
         .add({ x: 0, y: this.sprite.displayHeight / 2 })
-        .subtract({ x: l.x, y: l.y });
+        .subtract({ x: l.x + l.displayOriginX, y: l.y + l.displayOriginY });
       const dist = charPos.length();
       let dir = charPos.normalize();
       let shadowSprite = this.shadowSprites.get(l);
