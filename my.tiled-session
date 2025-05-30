@@ -3,12 +3,12 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "public/assets/maps/forest.tmj",
+    "activeFile": "",
     "expandedProjectPaths": [
-        "public",
         ".",
+        "public/assets/maps",
         "public/assets",
-        "public/assets/maps"
+        "public"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
@@ -24,8 +24,8 @@
             "scale": 1.175625,
             "selectedLayer": 1,
             "viewCenter": {
-                "x": 685.1674641148327,
-                "y": 440.1913875598086
+                "x": 784.2636895268475,
+                "y": 563.5300372142478
             }
         },
         "public/assets/maps/forest.tmj#forest": {
@@ -53,8 +53,13 @@
             "scaleInEditor": 1
         }
     },
-    "last.imagePath": "/home/vikram/src/my-phaser-game/public/assets/tilesets/forest",
+    "last.imagePath": "/home/vikram/src/my-phaser-game/public/assets/tilesets/spring_forest",
+    "map.fixedSize": true,
+    "map.height": 200,
     "map.lastUsedFormat": "json",
+    "map.tileHeight": 16,
+    "map.tileWidth": 16,
+    "map.width": 200,
     "openFiles": [
         "public/assets/maps/forest.tmj"
     ],
@@ -66,7 +71,7 @@
     ],
     "tileset.embedInMap": true,
     "tileset.tileSize": {
-        "height": 96,
-        "width": 80
+        "height": 16,
+        "width": 16
     }
 }
