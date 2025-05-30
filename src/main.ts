@@ -27,7 +27,6 @@ const config: Types.Core.GameConfig = {
   width: 1280,
   height: 800,
   parent: 'game-container',
-  maxTextures: 2,
   scale: {
     mode: Phaser.Scale.WIDTH_CONTROLS_HEIGHT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
