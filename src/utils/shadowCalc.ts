@@ -1,11 +1,11 @@
 import { CurrentTime } from '../objects/time';
 
 const SHADOW_SCALE_BASE_RADIUS = 64;
-const SHADOW_ALPHA_MAX = 0.8;
-const SHADOW_DAY_ALPHA_MAX = 0.8;
+const SHADOW_ALPHA_MAX = 0.6;
+const SHADOW_DAY_ALPHA_MAX = 0.6;
 const SHADOW_FALLLOFF_RATE = 1.4;
 const MIN_Y_SCALE = 1.1;
-const MAX_Y_SCALE = 5;
+const MAX_Y_SCALE = 2;
 const X_SCALE = 0.75;
 const ANGLE_DIFF_THRESHOLD = 0.01;
 const DISPLAY_HEIGHT_THRESHOLD = 32;
@@ -14,8 +14,8 @@ const SHADOW_DAY_MIN = 7;
 const SHADOW_DAY_MAX = 18;
 const TWILIGHT_MAX = 19;
 const SHADOW_ALPHA_TWLIGHT = 0;
-const SUN_Y_SCALE_POW = 1.5;
-const SUN_Y_SCALE_FACTOR = 4;
+const SUN_Y_SCALE_POW = 1;
+const SUN_Y_SCALE_FACTOR = 2;
 const LIGHT_SHADOW_IN_DAY_FACTOR = 0.2;
 const LIGHT_SHADOW_IN_TWILIGHT_FACTOR = 0.4;
 

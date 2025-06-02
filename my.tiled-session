@@ -3,12 +3,11 @@
         "height": 4300,
         "width": 2
     },
-    "activeFile": "",
+    "activeFile": "public/assets/maps/forest.tmj",
     "expandedProjectPaths": [
-        ".",
-        "public/assets/maps",
         "public/assets",
-        "public"
+        ".",
+        "public/assets/maps"
     ],
     "file.lastUsedOpenFilter": "All Files (*)",
     "fileStates": {
