@@ -135,7 +135,7 @@ const GLOBAL_SETTINGS = [
     time: 22,
     ambient: 0x04084f,
     saturate: -0.4,
-    brightness: 0.7,
+    brightness: 0.75,
     threshold1: 0.05,
     threshold2: 0.5,
     bloomEdge1: 0.03,

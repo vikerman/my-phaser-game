@@ -34,18 +34,25 @@ export class Preloader extends Scene {
       frameWidth: 16,
       frameHeight: 16,
     });
-    this.load.spritesheet('objects', 'tilesets/forest/gentle 32x32 v01.png', {
-      frameWidth: 32,
-      frameHeight: 32,
-    });
+    this.load.spritesheet(
+      'objects',
+      //'tilesets/forest/gentle 32x32 v01.png',
+      [
+        'tilesets/forest/gentle 32x32 v01.png',
+        'tilesets/forest/gentle 32x32 v01_n.png',
+      ] as any,
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      },
+    );
     this.load.spritesheet(
       'tree_objects',
-      'tilesets/forest/gentle trees 80x96 v01.png',
-      /*
+      //'tilesets/forest/gentle trees 80x96 v01.png',
       [
         'tilesets/forest/gentle trees 80x96 v01.png',
         'tilesets/forest/gentle trees 80x96 v01_n.png',
-      ] as any,*/
+      ] as any,
       {
         frameWidth: 80,
         frameHeight: 96,
@@ -55,10 +62,18 @@ export class Preloader extends Scene {
     this.load.image('shadow_sprite', 'characters/shadow_sprite.png');
     this.load.image('vignette', 'vignette.png');
 
-    this.load.spritesheet('king', 'characters/npc/npc king A v03.png', {
-      frameWidth: 32,
-      frameHeight: 32,
-    });
+    this.load.spritesheet(
+      'king',
+      // 'characters/npc/npc king A v03.png',
+      [
+        'characters/npc/npc king A v03.png',
+        'characters/npc/npc king A v03_n.png',
+      ] as any,
+      {
+        frameWidth: 32,
+        frameHeight: 32,
+      },
+    );
 
     this.load.audio('fire-idle', 'sounds/fire/Fireball_LOOP.wav');
     this.load.audio('waterfall', 'sounds/water/1_river_outside.wav');
