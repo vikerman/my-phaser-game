@@ -43,6 +43,11 @@ export class ObjectBase extends Phaser.GameObjects.Sprite {
       const l: Phaser.GameObjects.Light = (light as any).light;
       const objPos = new Phaser.Math.Vector2(worldPos);
 
+      // This is the sun. Skip it.
+      if (l.radius == this.scene.sys.canvas.width * 2) {
+        continue;
+      }
+
       // Calculate angle between light and character. (Note: charPos is mutated.)
       objPos
         .add({ x: 0, y: this.displayHeight / 2 })

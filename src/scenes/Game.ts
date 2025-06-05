@@ -8,6 +8,8 @@ export type SoundType =
   | Phaser.Sound.HTML5AudioSound
   | Phaser.Sound.WebAudioSound;
 
+const SUNLIGHT_INTENSITY = 0.5;
+
 // Lighting
 // Sunrise/Sunset
 // 0xfff474
@@ -25,7 +27,7 @@ const GLOBAL_SETTINGS = [
     time: 3,
     ambient: 0x04084f,
     saturate: -0.4,
-    brightness: 0.7,
+    brightness: 0.6,
     threshold1: 0.05,
     threshold2: 0.5,
     bloomEdge1: 0.03,
@@ -37,7 +39,7 @@ const GLOBAL_SETTINGS = [
     time: 7,
     ambient: 0xe08d3c, // Cloudy: 0x555555
     saturate: -0.2,
-    brightness: 0.75,
+    brightness: 0.65,
     threshold1: 0.05,
     threshold2: 0.9,
     bloomEdge1: 0.05,
@@ -55,50 +57,50 @@ const GLOBAL_SETTINGS = [
     threshold2: 0.9,
     bloomEdge1: 0.1,
     bloomEdge2: 0.9,
-    bloomAmount: 0.3,
+    bloomAmount: 0.2,
     vignetteAlpha: 0.5,
   },
   {
     time: 12,
-    ambient: 0xeeeeee,
-    saturate: -0.3,
-    brightness: 0.8,
-    threshold1: 0.05,
-    threshold2: 0.9,
-    bloomEdge1: 0.1,
-    bloomEdge2: 0.9,
-    bloomAmount: 0.2,
-    vignetteAlpha: 0.5,
-  },
-  {
-    time: 15,
-    ambient: 0xcccccc,
-    saturate: -0.3,
-    brightness: 0.8,
-    threshold1: 0.05,
-    threshold2: 0.9,
-    bloomEdge1: 0.1,
-    bloomEdge2: 0.9,
-    bloomAmount: 0.2,
-    vignetteAlpha: 0.5,
-  },
-  {
-    time: 17,
     ambient: 0xaaaaaa,
     saturate: -0.3,
     brightness: 0.8,
     threshold1: 0.05,
     threshold2: 0.9,
     bloomEdge1: 0.1,
+    bloomEdge2: 0.9,
+    bloomAmount: 0,
+    vignetteAlpha: 0.5,
+  },
+  {
+    time: 15,
+    ambient: 0xaaaaaa,
+    saturate: -0.3,
+    brightness: 0.8,
+    threshold1: 0.05,
+    threshold2: 0.9,
+    bloomEdge1: 0.1,
+    bloomEdge2: 0.9,
+    bloomAmount: 0,
+    vignetteAlpha: 0.5,
+  },
+  {
+    time: 17,
+    ambient: 0x666666,
+    saturate: -0.3,
+    brightness: 0.8,
+    threshold1: 0.05,
+    threshold2: 0.9,
+    bloomEdge1: 0.1,
     bloomEdge2: 0.85,
-    bloomAmount: 0.4,
+    bloomAmount: 0.2,
     vignetteAlpha: 0.5,
   },
   {
     time: 18,
     ambient: 0xe08d3c, // Cloudy: 0x555555
     saturate: -0.3,
-    brightness: 0.75,
+    brightness: 0.5,
     threshold1: 0.05,
     threshold2: 0.8,
     bloomEdge1: 0.06,
@@ -111,7 +113,7 @@ const GLOBAL_SETTINGS = [
     time: 19,
     ambient: 0x1e2208,
     saturate: -0.3,
-    brightness: 0.75,
+    brightness: 0.65,
     threshold1: 0.05,
     threshold2: 0.8,
     bloomEdge1: 0.03,
@@ -123,7 +125,7 @@ const GLOBAL_SETTINGS = [
     time: 20,
     ambient: 0x191c5c,
     saturate: -0.4,
-    brightness: 0.75,
+    brightness: 0.65,
     threshold1: 0.05,
     threshold2: 0.7,
     bloomEdge1: 0.03,
@@ -135,7 +137,7 @@ const GLOBAL_SETTINGS = [
     time: 22,
     ambient: 0x04084f,
     saturate: -0.4,
-    brightness: 0.75,
+    brightness: 0.65,
     threshold1: 0.05,
     threshold2: 0.5,
     bloomEdge1: 0.03,
@@ -150,6 +152,7 @@ export class Game extends Scene {
   background: Phaser.GameObjects.Image;
   msg_text: Phaser.GameObjects.Text;
   player: Character;
+  sunLight: Phaser.GameObjects.Light;
   fixedLight: Phaser.GameObjects.Light;
   waterfall: SoundType;
   nightSound: SoundType;
@@ -307,6 +310,16 @@ export class Game extends Scene {
 
     const playerPos = this.player.getPosition();
 
+    // Add the "sun" light
+    const cameraPos = this.camera.midPoint;
+    this.sunLight = this.lights.addLight(
+      cameraPos.x - this.sys.canvas.width,
+      cameraPos.y,
+      this.sys.canvas.width * 2,
+      0xffffff,
+      SUNLIGHT_INTENSITY,
+    );
+
     // Add a fixed light.
     const fixedPos = { x: playerPos.x, y: playerPos.y + 200 };
     const lightHeight = 50;
@@ -441,6 +454,36 @@ export class Game extends Scene {
     if (dist != 0) {
       let vol = Math.max(0, Math.min(1, 50 / dist));
       this.waterfall.setVolume(vol);
+    }
+
+    // Move the sun light
+    const cameraPos = this.camera.midPoint;
+    const sunDist = this.sys.canvas.width;
+    const date = CurrentTime;
+    const hrs = date.getHours() + date.getMinutes() / 60;
+
+    if (hrs >= 5 && hrs <= 19) {
+      this.sunLight.setVisible(true);
+
+      let angle = 0;
+      let intensity = SUNLIGHT_INTENSITY;
+      if (hrs < 6) {
+        angle = 0;
+        intensity = (6 - hrs) * SUNLIGHT_INTENSITY;
+      } else if (hrs > 18) {
+        angle = Math.PI;
+        intensity = (hrs - 18) * SUNLIGHT_INTENSITY;
+      } else {
+        angle = ((hrs - 6) / 12) * Math.PI;
+      }
+      this.sunLight.setPosition(
+        cameraPos.x + sunDist * Math.cos(angle),
+        cameraPos.y - sunDist * Math.sin(angle),
+      );
+      this.sunLight.color = this.lights.ambientColor;
+      this.sunLight.intensity = intensity;
+    } else {
+      this.sunLight.setVisible(false);
     }
 
     // TODO: Extract this to a util function

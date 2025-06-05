@@ -606,6 +606,11 @@ export class Character {
       const l: Phaser.GameObjects.Light = (light as any).light;
       const charPos = new Phaser.Math.Vector2(worldPos);
 
+      // This is the sun. Skip it.
+      if (l.radius == this.scene.sys.canvas.width * 2) {
+        continue;
+      }
+
       // Calculate angle between light and character. (Note: charPos is mutated.)
       charPos
         .add({ x: 0, y: this.sprite.displayHeight / 2 })
