@@ -8,7 +8,7 @@ export type SoundType =
   | Phaser.Sound.HTML5AudioSound
   | Phaser.Sound.WebAudioSound;
 
-const SUNLIGHT_INTENSITY = 0.5;
+const SUNLIGHT_INTENSITY = 0.85;
 
 // Lighting
 // Sunrise/Sunset
