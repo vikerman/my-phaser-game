@@ -51,7 +51,7 @@ const GLOBAL_SETTINGS = [
   {
     time: 8,
     ambient: 0xfff474,
-    saturate: -0.2,
+    saturate: -0.3,
     brightness: 0.7,
     threshold1: 0.05,
     threshold2: 0.9,
@@ -63,8 +63,8 @@ const GLOBAL_SETTINGS = [
   {
     time: 12,
     ambient: 0xaaaaaa,
-    saturate: -0.3,
-    brightness: 0.8,
+    saturate: -0.2,
+    brightness: 1,
     threshold1: 0.05,
     threshold2: 0.9,
     bloomEdge1: 0.1,
@@ -74,9 +74,9 @@ const GLOBAL_SETTINGS = [
   },
   {
     time: 15,
-    ambient: 0xaaaaaa,
-    saturate: -0.3,
-    brightness: 0.8,
+    ambient: 0xcccccc,
+    saturate: -0.2,
+    brightness: 1,
     threshold1: 0.05,
     threshold2: 0.9,
     bloomEdge1: 0.1,
